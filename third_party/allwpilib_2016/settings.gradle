@@ -1,0 +1,11 @@
+include 'hal',
+        'wpilibc',
+        'wpilibcIntegrationTests',
+        'wpilibj',
+        'wpilibjIntegrationTests'
+
+if (hasProperty("makeSim")){
+include 'simulation',
+        'simulation:JavaGazebo',
+        'simulation:SimDS'
+}
