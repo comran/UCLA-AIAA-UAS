@@ -6,7 +6,23 @@ cc_binary(
   name = 'original',
   visibility = ['//visibility:public'],
   srcs = [
-    'original.cpp',
+    'original.cc',
+  ],
+  deps = cpu_select({
+    'amd64': [
+      '//external:opencv'
+    ],
+    'raspi': [
+      '//external:opencv'
+    ],
+  }),
+)
+
+cc_binary(
+  name = 'color_tracking',
+  visibility = ['//visibility:public'],
+  srcs = [
+    'color_tracking.cc',
   ],
   deps = cpu_select({
     'amd64': [
