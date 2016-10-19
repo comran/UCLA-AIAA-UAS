@@ -1,5 +1,5 @@
 #include "opencv/cv.h"
-#include "opencv/highgui.h"
+#include "opencv2/highgui/highgui_c.h"
 
 int main()
 {
