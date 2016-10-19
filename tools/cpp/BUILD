@@ -5,14 +5,14 @@ cc_library(
   srcs = [ 'empty_main.c' ],
 )
 
-cc_library(
-  name = 'malloc',
-  deps = select({
-    '//tools:has_asan': [],
-    '//tools:has_tsan': [],
-    '//conditions:default': ['//third_party/gperftools:tcmalloc'],
-  }),
-)
+#cc_library(
+#  name = 'malloc',
+#  deps = select({
+#    '//tools:has_asan': [],
+#    '//tools:has_tsan': [],
+#    '//conditions:default': ['//third_party/gperftools:tcmalloc'],
+#  }),
+#)
 
 cc_library(
   name = 'stl',
@@ -37,11 +37,9 @@ filegroup(
   name = 'toolchain',
   srcs = [
     ':cc-compiler-k8',
-    ':cc-compiler-roborio',
-    '@arm_frc_linux_gnueabi_repo//:compiler_components',
-    ':roborio-compiler-files',
+    ':cc-compiler-raspi',
     ':flags_compiler_inputs',
-    '@linaro_linux_gcc_4_9_repo//:compiler_components',
+    '@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//:compiler_components',
     ':linaro-gcc-files',
   ],
 )
@@ -75,87 +73,46 @@ cc_toolchain(
 )
 
 filegroup(
-  name = 'roborio-compiler-files',
+  name = 'raspi-gcc-files',
   srcs = [
-    '//tools/cpp/arm-frc-linux-gnueabi:tool-wrappers',
-    '//tools/cpp/arm-frc-linux-gnueabi:as',
-    '@arm_frc_linux_gnueabi_repo//:compiler_pieces',
-    ':flags_compiler_inputs',
-  ],
-)
-
-filegroup(
-  name = 'roborio_linker_files',
-  srcs = [
-    '//tools/cpp/arm-frc-linux-gnueabi:ld',
-    '//tools/cpp/arm-frc-linux-gnueabi:ar',
-    '//tools/cpp/arm-frc-linux-gnueabi:gcc',
-    '@arm_frc_linux_gnueabi_repo//:compiler_pieces',
-  ],
-)
-filegroup(
-  name = 'roborio_compiler_files',
-  srcs = [
-    '//tools/cpp/arm-frc-linux-gnueabi:gcc',
-    '//tools/cpp/arm-frc-linux-gnueabi:ld',
-  ],
-)
-
-cc_toolchain(
-  name = 'cc-compiler-roborio',
-  all_files = ':roborio-compiler-files',
-  compiler_files = ':roborio_compiler_files',
-  cpu = 'roborio',
-  dwp_files = ':empty',
-  dynamic_runtime_libs = [':empty'],
-  linker_files = ':roborio_linker_files',
-  objcopy_files = '//tools/cpp/arm-frc-linux-gnueabi:objcopy',
-  static_runtime_libs = [':empty'],
-  strip_files = '//tools/cpp/arm-frc-linux-gnueabi:strip',
-  supports_param_files = 1,
-)
-
-filegroup(
-  name = 'linaro-gcc-files',
-  srcs = [
-    '//tools/cpp/linaro_linux_gcc:clang-symlinks',
-    '//tools/cpp/linaro_linux_gcc:tool-wrappers',
-    '@linaro_linux_gcc_4_9_repo//:compiler_pieces',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang-symlinks',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:tool-wrappers',
+    '@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//:compiler_pieces',
   ],
 )
 
 filegroup(
   name = 'linaro_linux_linker_files',
   srcs = [
-    '//tools/cpp/linaro_linux_gcc:gcc',
-    '//tools/cpp/linaro_linux_gcc:ld',
-    '//tools/cpp/linaro_linux_gcc:ar',
-    '//tools/cpp/linaro_linux_gcc:clang-ld',
-    '//tools/cpp/linaro_linux_gcc:clang',
-    '@linaro_linux_gcc_4_9_repo//:compiler_pieces',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:gcc',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:ld',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:ar',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang-ld',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang',
+    '@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//:compiler_pieces',
   ],
 )
 
 filegroup(
   name = 'linaro_linux_compiler_files',
   srcs = [
-    '//tools/cpp/linaro_linux_gcc:gcc',
-    '//tools/cpp/linaro_linux_gcc:ld',
-    '//tools/cpp/linaro_linux_gcc:clang',
-    '//tools/cpp/linaro_linux_gcc:as',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:gcc',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:ld',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang',
+    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:as',
   ],
 )
 
 cc_toolchain(
-  name = 'cc-compiler-armhf-debian',
-  all_files = ':linaro-gcc-files',
+  name = 'cc-compiler-raspi',
+  all_files = ':raspi-gcc-files',
   compiler_files = ':linaro_linux_compiler_files',
-  cpu = 'armhf',
+  cpu = 'raspi',
   dwp_files = ':empty',
   dynamic_runtime_libs = [':empty'],
   linker_files = ':linaro_linux_linker_files',
-  objcopy_files = '//tools/cpp/linaro_linux_gcc:objcopy',
+  objcopy_files = '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:objcopy',
   static_runtime_libs = [':empty'],
-  strip_files = '//tools/cpp/linaro_linux_gcc:strip',
+  strip_files = '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:strip',
   supports_param_files = 1,
 )

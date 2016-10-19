@@ -3,16 +3,16 @@
 # quickly find issues where something new isn't handled.
 # It will also make adding ORs when it makes sense easy to do nicely.
 
-all_cpus = ['amd64', 'roborio', 'armhf']
+all_cpus = ['amd64', 'raspi']
 '''All of the CPUs we know about.'''
 
 '''A select wrapper for CPU architectures.
 
 Args:
   values: A mapping from architecture names (as strings) to other things.
-          Currently amd64, roborio, and armhf are recognized.
+          Currently amd64 and raspi are recognized.
           'else' is also allowed as a default.
-          'arm' is allowed instead of roborio and armhf.
+          'arm' is allowed instead of raspi.
 Returns a select which evaluates to the correct element of values.
 '''
 def cpu_select(values):
@@ -21,8 +21,7 @@ def cpu_select(values):
     for cpu in values:
       if cpu != 'arm':
         new_values[cpu] = values[cpu]
-    new_values['armhf'] = values['arm']
-    new_values['roborio'] = values['arm']
+    new_values['raspi'] = values['arm']
     values = new_values
   for cpu in all_cpus:
     if cpu not in values:
@@ -35,8 +34,7 @@ def cpu_select(values):
       fail('Not sure what a %s CPU is!' % key, 'values')
   return select({
     '//tools:cpu_k8': values['amd64'],
-    '//tools:cpu_roborio': values['roborio'],
-    '//tools:cpu_armhf': values['armhf'],
+    '//tools:cpu_raspi': values['raspi'],
   })
 
 '''A select wrapper for address space sizes.
@@ -52,7 +50,6 @@ def address_size_select(values):
     fail('Need to handle 64 bit addresses!', 'values')
   return select({
     '//tools:cpu_k8': values['64'],
-    '//tools:cpu_roborio': values['32'],
   })
 
 '''A select wrapper for compilers.

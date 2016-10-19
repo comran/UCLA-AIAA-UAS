@@ -7,7 +7,7 @@ build --host_crosstool_top=//tools/cpp:toolchain
 build --strip=never
 
 # Use the malloc we want.
-build --custom_malloc=//tools/cpp:malloc
+#build --custom_malloc=//tools/cpp:malloc
 
 build:asan --copt -fsanitize=address
 build:asan --linkopt -fsanitize=address --linkopt -ldl

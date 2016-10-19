@@ -16,8 +16,8 @@ config_setting(
   values = {'cpu': 'k8'},
 )
 config_setting(
-  name = 'cpu_roborio',
-  values = {'cpu': 'roborio'},
+  name = 'cpu_raspi',
+  values = {'cpu': 'raspi'},
 )
 config_setting(
   name = 'cpu_armhf',

@@ -18,11 +18,11 @@ bind(
   actual = '@slycot_repo//:slycot',
 )
 
-new_http_archive(
-  name = 'arm_frc_linux_gnueabi_repo',
-  build_file = 'tools/cpp/arm-frc-linux-gnueabi/arm-frc-linux-gnueabi.BUILD',
-  sha256 = '9e93b0712e90d11895444f720f0c90c649fb9becb4ca28bb50749d9074eb1306',
-  url = 'http://frc971.org/Build-Dependencies/roborio-compiler-2016.tar.gz',
+new_git_repository(
+  name = 'gcc_linaro_arm_linux_gnueabihf_raspbian_repo',
+  remote = 'https://github.com/raspberrypi/tools.git',
+  build_file = 'compilers/gcc_linaro_arm_linux_gnueabihf_raspbian.BUILD',
+  commit = 'e810a0b88e864dbcdb8c750f65ec454f65c56a3a',
 )
 
 # Recompressed version of the one downloaded from Linaro at
