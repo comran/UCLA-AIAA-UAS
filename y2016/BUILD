@@ -33,3 +33,22 @@ cc_binary(
     ],
   }),
 )
+
+cc_binary(
+  name = 'shape_detection',
+  visibility = ['//visibility:public'],
+  srcs = [
+    'shape_detection.cc',
+  ],
+  deps = cpu_select({
+    'amd64': [
+      '//external:opencv'
+    ],
+    'raspi': [
+      '//external:opencv'
+    ],
+  }),
+  copts = [
+    '-Wno-cast-align',
+  ],
+)
