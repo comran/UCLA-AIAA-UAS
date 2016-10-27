@@ -19,6 +19,7 @@ int main(int, char **) {
   // Convert the original image into grayscale and do thresholding.
   ::cv::cvtColor(original_frame, filtered_frame, CV_BGR2GRAY);
   show_frame("Black and white frame", filtered_frame);
+
   ::cv::threshold(filtered_frame, filtered_frame, 110, 255, CV_THRESH_BINARY);
   show_frame("Thresholded frame", filtered_frame);
 
@@ -27,73 +28,46 @@ int main(int, char **) {
 
   ::cv::findContours(filtered_frame, contours, hierarchy, CV_RETR_CCOMP,
                      CV_CHAIN_APPROX_SIMPLE);
+  // Iterate through each contour and draw them out if they are good.
+  for (size_t i = 0; i < contours.size(); i++) {
+    double perimeter = ::cv::arcLength(contours.at(i), true);
+    ::std::vector<::cv::Point> contour_estimate;
+    ::cv::approxPolyDP(contours.at(i), contour_estimate, perimeter * 0.02,
+                       true);
 
-/*
-  for (int idx = 0; idx >= 0; idx = hierarchy[idx][0]) {
-    ::cv::Scalar color(rand() & 255, rand() & 255, rand() & 255);
-    drawContours(dst, contours, idx, color, CV_FILLED, 8, hierarchy);
-  }
+    bool known_shape = true;
+    double area = ::cv::contourArea(contours.at(i), false);
+    ::std::cout << "area of contour " << i << " is " << area << ::std::endl;
 
-  ::cv::namedWindow("Components", 1);
-  ::cv::imshow("Components", dst);*/
-  ::cv::waitKey(0);
-  /*
-    // Iterate through each contour.
-    while (contours) {
-      // Obtain a sequence of points in the contour.
-      result =
-          cvApproxPoly(contours, sizeof(CvContour), storage, CV_POLY_APPROX_DP,
-                       cvContourPerimeter(contours) * 0.02, 0);
-
-      CvPoint *pt[100];
-      bool known_shape = true;
-      short color[] = {0, 0, 0};
-      double area = cvContourArea(contours, CV_WHOLE_SEQ, 0);
-      ::std::cout << "Found contour: " << result->total << " with area: " <<
-    area
-                  << ::std::endl;
-
-      if (result->total < 3 || result->total > 99 || area < 1000) {
-        known_shape = false;
-      }
-
-      if (area < 10) {
-        color[0] = 10;
-      } else if (area < 100) {
-        color[0] = 50;
-      } else if (area < 1000) {
-        color[0] = 150;
-      } else {
-        color[0] = 255;
-      }
-
-      if (known_shape) {
-        // Iterate through each point.
-        for (int i = 0; i < result->total; i++) {
-          pt[i] = (CvPoint *)cvGetSeqElem(result, i);
-        }
-
-        // Draw lines around the polygon.
-        for (int i = 0; i < result->total; i++) {
-          cvLine(img, *pt[i], *pt[(i + 1) % result->total],
-                 cvScalar(color[0], color[1], color[2]), 4);
-        }
-      }
-
-      // Obtain the next contour.
-      contours = contours->h_next;
+    // Filter out the small contours.
+    if (area < 1000) {
+      known_shape = false;
     }
 
-    // Show the image in which identified shapes are marked.
-    cvShowImage("Tracked", img);
-    cvShowImage("Tracked Gray", imgGrayScale);
+    short color[] = {0, 0, 0};
+    if (area < 10) {
+      color[0] = 10;
+    } else if (area < 100) {
+      color[0] = 50;
+    } else if (area < 1000) {
+      color[0] = 150;
+    } else {
+      color[0] = 255;
+    }
 
-    cvWaitKey(0);  // Wait for a keypress to exit.
+    if (known_shape) {
+      // Iterate through each point.
+      for (size_t i = 0; i < contour_estimate.size(); i++) {
+        ::cv::Point from = contour_estimate.at(i);
+        ::cv::Point to = contour_estimate.at((i + 1) % contour_estimate.size());
+        ::cv::line(original_frame, from, to,
+                   ::cv::Scalar(color[0], color[1], color[2]), 4);
+      }
+    }
+  }
 
-    cvDestroyAllWindows();
-    cvReleaseMemStorage(&storage);
-    cvReleaseImage(&img);
-    cvReleaseImage(&imgGrayScale);*/
+  show_frame("Output frame", original_frame);
 
+  ::cv::waitKey(0);
   return 0;
 }

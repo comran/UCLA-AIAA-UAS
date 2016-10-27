@@ -54,10 +54,10 @@ cc_binary(
 )
 
 cc_binary(
-  name = 'filtered_video',
+  name = 'streaming_shape_detection',
   visibility = ['//visibility:public'],
   srcs = [
-    'filtered_video.cc',
+    'streaming_shape_detection.cc',
   ],
   deps = cpu_select({
     'amd64': [
