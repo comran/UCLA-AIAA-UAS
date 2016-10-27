@@ -1,94 +1,99 @@
 #include <iostream>
 
-#include "opencv/cv.h"
-#include "opencv2/highgui/highgui_c.h"
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui/highgui.hpp"
 
-int main() {
-  IplImage *img = cvLoadImage("./auvsi_suas.png");
+void show_frame(const ::std::string window_name, ::cv::Mat &frame) {
+  ::cv::namedWindow(window_name);
+  ::cv::imshow(window_name, frame);
+}
 
-  // Show the original image.
-  cvNamedWindow("Raw");
-  cvShowImage("Raw", img);
+int main(int, char **) {
+  ::cv::Mat original_frame =
+                ::cv::imread("./auvsi_suas.png", CV_LOAD_IMAGE_COLOR),
+            filtered_frame = ::cv::Mat::zeros(original_frame.rows,
+                                              original_frame.cols, CV_8UC3);
 
-  // Convert the original image into grayscale.
-  IplImage *imgGrayScale = cvCreateImage(cvGetSize(img), 8, 1);
-  cvCvtColor(img, imgGrayScale, CV_BGR2GRAY);
+  show_frame("Original frame", original_frame);
 
-  // Threshold the grayscale image to get better results.
-  cvThreshold(imgGrayScale, imgGrayScale, 110, 255, CV_THRESH_BINARY);
+  // Convert the original image into grayscale and do thresholding.
+  ::cv::cvtColor(original_frame, filtered_frame, CV_BGR2GRAY);
+  show_frame("Black and white frame", filtered_frame);
+  ::cv::threshold(filtered_frame, filtered_frame, 110, 255, CV_THRESH_BINARY);
+  show_frame("Thresholded frame", filtered_frame);
 
-  CvSeq *contours;  // Hold the pointer to a contour in the memory block.
-  CvSeq *result;    // Hold sequence of points of a contour.
+  ::std::vector<::std::vector<::cv::Point>> contours;
+  ::std::vector<::cv::Vec4i> hierarchy;
 
-  CvMemStorage *storage = cvCreateMemStorage(0);  // Store the contours.
+  ::cv::findContours(filtered_frame, contours, hierarchy, CV_RETR_CCOMP,
+                     CV_CHAIN_APPROX_SIMPLE);
 
-  // Find all contours in the image.
-  cvFindContours(imgGrayScale, storage, &contours, sizeof(CvContour),
-                 CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cvPoint(0, 0));
-
-  // Iterate through each contour.
-  while (contours) {
-    // Obtain a sequence of points in the contour.
-    result =
-        cvApproxPoly(contours, sizeof(CvContour), storage, CV_POLY_APPROX_DP,
-                     cvContourPerimeter(contours) * 0.02, 0);
-
-    CvPoint *pt[100];
-    bool known_shape = true;
-    short color[3];
-    double area = cvContourArea(contours, CV_WHOLE_SEQ, 0);
-    ::std::cout << "Found contour: " << result->total << " with area: " << area
-                << ::std::endl;
-
-    if (result->total < 3 || result->total > 99 || area < 1000) {
-      known_shape = false;
-    }
-
-    if (area < 10) {
-      color[0] = 0;
-      color[1] = 0;
-      color[2] = 0;
-    } else if (area < 100) {
-      color[0] = 50;
-      color[1] = 0;
-      color[2] = 0;
-    } else if (area < 1000) {
-      color[0] = 150;
-      color[1] = 0;
-      color[2] = 0;
-    } else {
-      color[0] = 255;
-      color[1] = 0;
-      color[2] = 0;
-    }
-
-    if (known_shape) {
-      // Iterate through each point.
-      for (int i = 0; i < result->total; i++) {
-        pt[i] = (CvPoint *)cvGetSeqElem(result, i);
-      }
-
-      // Draw lines around the polygon.
-      for (int i = 0; i < result->total; i++) {
-        cvLine(img, *pt[i], *pt[(i + 1) % result->total],
-               cvScalar(color[0], color[1], color[2]), 4);
-      }
-    }
-
-    // Obtain the next contour.
-    contours = contours->h_next;
+/*
+  for (int idx = 0; idx >= 0; idx = hierarchy[idx][0]) {
+    ::cv::Scalar color(rand() & 255, rand() & 255, rand() & 255);
+    drawContours(dst, contours, idx, color, CV_FILLED, 8, hierarchy);
   }
 
-  // Show the image in which identified shapes are marked.
-  cvShowImage("Tracked", img);
-  cvShowImage("Tracked Gray", imgGrayScale);
+  ::cv::namedWindow("Components", 1);
+  ::cv::imshow("Components", dst);*/
+  ::cv::waitKey(0);
+  /*
+    // Iterate through each contour.
+    while (contours) {
+      // Obtain a sequence of points in the contour.
+      result =
+          cvApproxPoly(contours, sizeof(CvContour), storage, CV_POLY_APPROX_DP,
+                       cvContourPerimeter(contours) * 0.02, 0);
 
-  cvWaitKey(0);  // Wait for a keypress to exit.
+      CvPoint *pt[100];
+      bool known_shape = true;
+      short color[] = {0, 0, 0};
+      double area = cvContourArea(contours, CV_WHOLE_SEQ, 0);
+      ::std::cout << "Found contour: " << result->total << " with area: " <<
+    area
+                  << ::std::endl;
 
-  cvDestroyAllWindows();
-  cvReleaseMemStorage(&storage);
-  cvReleaseImage(&img);
-  cvReleaseImage(&imgGrayScale);
+      if (result->total < 3 || result->total > 99 || area < 1000) {
+        known_shape = false;
+      }
+
+      if (area < 10) {
+        color[0] = 10;
+      } else if (area < 100) {
+        color[0] = 50;
+      } else if (area < 1000) {
+        color[0] = 150;
+      } else {
+        color[0] = 255;
+      }
+
+      if (known_shape) {
+        // Iterate through each point.
+        for (int i = 0; i < result->total; i++) {
+          pt[i] = (CvPoint *)cvGetSeqElem(result, i);
+        }
+
+        // Draw lines around the polygon.
+        for (int i = 0; i < result->total; i++) {
+          cvLine(img, *pt[i], *pt[(i + 1) % result->total],
+                 cvScalar(color[0], color[1], color[2]), 4);
+        }
+      }
+
+      // Obtain the next contour.
+      contours = contours->h_next;
+    }
+
+    // Show the image in which identified shapes are marked.
+    cvShowImage("Tracked", img);
+    cvShowImage("Tracked Gray", imgGrayScale);
+
+    cvWaitKey(0);  // Wait for a keypress to exit.
+
+    cvDestroyAllWindows();
+    cvReleaseMemStorage(&storage);
+    cvReleaseImage(&img);
+    cvReleaseImage(&imgGrayScale);*/
 
   return 0;
 }

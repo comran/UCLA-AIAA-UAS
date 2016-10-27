@@ -52,3 +52,22 @@ cc_binary(
     '-Wno-cast-align',
   ],
 )
+
+cc_binary(
+  name = 'filtered_video',
+  visibility = ['//visibility:public'],
+  srcs = [
+    'filtered_video.cc',
+  ],
+  deps = cpu_select({
+    'amd64': [
+      '//external:opencv'
+    ],
+    'raspi': [
+      '//external:opencv'
+    ],
+  }),
+  copts = [
+    '-Wno-cast-align',
+  ],
+)
