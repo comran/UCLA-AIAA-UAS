@@ -2,6 +2,7 @@
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
 void show_frame(const ::std::string window_name, ::cv::Mat &frame) {
   ::cv::namedWindow(window_name);
@@ -13,15 +14,18 @@ int main(int, char **) {
   while (true) {
     ::cv::Mat original_frame;
     camera >> original_frame;
-    ::cv::Mat filtered_frame = ::cv::Mat::zeros(original_frame.rows,
-                                                original_frame.cols, CV_8UC3);
+    ::cv::Mat filtered_frame =
+        ::cv::Mat::zeros(original_frame.rows, original_frame.cols, CV_8UC3);
 
     show_frame("Original frame", original_frame);
 
     // Convert the original image into grayscale and do thresholding.
-    ::cv::cvtColor(original_frame, filtered_frame, CV_BGR2GRAY);
+    //::cv::cvtColor(original_frame, filtered_frame, CV_RGB2GRAY);
+    ::cv::extractChannel(original_frame, filtered_frame, 0);
     show_frame("Black and white frame", filtered_frame);
-    ::cv::threshold(filtered_frame, filtered_frame, 110, 255, CV_THRESH_BINARY);
+    ::cv::adaptiveThreshold(filtered_frame, filtered_frame, 255,
+                            ::cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+                            ::cv::THRESH_BINARY, 31, 2);
     show_frame("Thresholded frame", filtered_frame);
 
     ::std::vector<::std::vector<::cv::Point>> contours;
@@ -29,6 +33,7 @@ int main(int, char **) {
 
     ::cv::findContours(filtered_frame, contours, hierarchy, CV_RETR_CCOMP,
                        CV_CHAIN_APPROX_SIMPLE);
+
     // Iterate through each contour and draw them out if they are good.
     for (size_t i = 0; i < contours.size(); i++) {
       double perimeter = ::cv::arcLength(contours.at(i), true);
@@ -39,29 +44,25 @@ int main(int, char **) {
       bool known_shape = true;
       double area = ::cv::contourArea(contours.at(i), false);
 
-      // Filter out the small contours.
-      if (area < 1000) {
-        known_shape = false;
-      }
+      // Filter out the small and huge contours.
+      if (area < 1000 || area > 5000) known_shape = false;
 
-      short color[] = {0, 0, 0};
-      if (area < 10) {
-        color[0] = 10;
-      } else if (area < 100) {
-        color[0] = 50;
-      } else if (area < 1000) {
-        color[0] = 150;
-      } else {
-        color[0] = 255;
-      }
+      ::cv::Scalar color(0, 0, 255);
 
       if (known_shape) {
         // Iterate through each point.
+        /*
+        ::cv::Point text_point = contour_estimate.at(0);
+        ::std::ostringstream s;
+        s << "Area: " << area;
+        ::cv::putText(original_frame, s.str(), text_point, 0, 1, color);*/
+
         for (size_t i = 0; i < contour_estimate.size(); i++) {
           ::cv::Point from = contour_estimate.at(i);
-          ::cv::Point to = contour_estimate.at((i + 1) % contour_estimate.size());
-          ::cv::line(original_frame, from, to,
-                     ::cv::Scalar(color[0], color[1], color[2]), 4);
+          ::cv::Point to =
+              contour_estimate.at((i + 1) % contour_estimate.size());
+
+          ::cv::line(original_frame, from, to, color, 4);
         }
       }
     }
