@@ -24,8 +24,9 @@ int main(int, char **) {
     ::cv::extractChannel(original_frame, filtered_frame, 0);
     show_frame("Black and white frame", filtered_frame);
     ::cv::adaptiveThreshold(filtered_frame, filtered_frame, 255,
-                            ::cv::ADAPTIVE_THRESH_GAUSSIAN_C,
-                            ::cv::THRESH_BINARY, 31, 2);
+                            ::cv::ADAPTIVE_THRESH_MEAN_C,
+                            ::cv::THRESH_BINARY, 91, 2);
+    //::cv::threshold(filtered_frame, filtered_frame, 110, 255, CV_THRESH_BINARY);
     show_frame("Thresholded frame", filtered_frame);
 
     ::std::vector<::std::vector<::cv::Point>> contours;
@@ -45,17 +46,17 @@ int main(int, char **) {
       double area = ::cv::contourArea(contours.at(i), false);
 
       // Filter out the small and huge contours.
-      if (area < 1000 || area > 5000) known_shape = false;
+      if (area < 800 || area > 5000) known_shape = false;
 
       ::cv::Scalar color(0, 0, 255);
 
       if (known_shape) {
         // Iterate through each point.
-        /*
-        ::cv::Point text_point = contour_estimate.at(0);
+        /*::cv::Point text_point = contour_estimate.at(0);
         ::std::ostringstream s;
         s << "Area: " << area;
-        ::cv::putText(original_frame, s.str(), text_point, 0, 1, color);*/
+        ::cv::putText(original_frame, s.str(), text_point, 0, 1, ::cv::Scalar(0, 255, 0));
+        */
 
         for (size_t i = 0; i < contour_estimate.size(); i++) {
           ::cv::Point from = contour_estimate.at(i);
