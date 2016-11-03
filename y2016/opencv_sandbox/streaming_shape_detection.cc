@@ -11,23 +11,20 @@ void show_frame(const ::std::string window_name, ::cv::Mat &frame) {
 
 int main(int, char **) {
   ::cv::VideoCapture camera(0);
+
   while (true) {
     ::cv::Mat original_frame;
     camera >> original_frame;
-    ::cv::Mat filtered_frame =
-        ::cv::Mat::zeros(original_frame.rows, original_frame.cols, CV_8UC3);
 
     show_frame("Original frame", original_frame);
 
+    ::cv::Mat filtered_frame;
+
     // Convert the original image into grayscale and do thresholding.
-    //::cv::cvtColor(original_frame, filtered_frame, CV_RGB2GRAY);
     ::cv::extractChannel(original_frame, filtered_frame, 0);
     show_frame("Black and white frame", filtered_frame);
-    ::cv::adaptiveThreshold(filtered_frame, filtered_frame, 255,
-                            ::cv::ADAPTIVE_THRESH_MEAN_C,
-                            ::cv::THRESH_BINARY, 91, 2);
-    //::cv::threshold(filtered_frame, filtered_frame, 110, 255, CV_THRESH_BINARY);
-    show_frame("Thresholded frame", filtered_frame);
+    ::cv::Canny(filtered_frame, filtered_frame, 100, 100 * 2, 3);
+    show_frame("Canny frame", filtered_frame);
 
     ::std::vector<::std::vector<::cv::Point>> contours;
     ::std::vector<::cv::Vec4i> hierarchy;
@@ -52,11 +49,6 @@ int main(int, char **) {
 
       if (known_shape) {
         // Iterate through each point.
-        /*::cv::Point text_point = contour_estimate.at(0);
-        ::std::ostringstream s;
-        s << "Area: " << area;
-        ::cv::putText(original_frame, s.str(), text_point, 0, 1, ::cv::Scalar(0, 255, 0));
-        */
 
         for (size_t i = 0; i < contour_estimate.size(); i++) {
           ::cv::Point from = contour_estimate.at(i);

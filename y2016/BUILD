@@ -2,43 +2,13 @@ package(default_visibility = ['//visibility:public'])
 
 load('/tools/build_rules/select', 'cpu_select', 'compiler_select')
 
-cc_binary(
-  name = 'original',
-  visibility = ['//visibility:public'],
+cc_library(
+  name = 'shape_detector_lib',
   srcs = [
-    'original.cc',
+    'shape_detector.cc',
   ],
-  deps = cpu_select({
-    'amd64': [
-      '//external:opencv'
-    ],
-    'raspi': [
-      '//external:opencv'
-    ],
-  }),
-)
-
-cc_binary(
-  name = 'color_tracking',
-  visibility = ['//visibility:public'],
-  srcs = [
-    'color_tracking.cc',
-  ],
-  deps = cpu_select({
-    'amd64': [
-      '//external:opencv'
-    ],
-    'raspi': [
-      '//external:opencv'
-    ],
-  }),
-)
-
-cc_binary(
-  name = 'shape_detection',
-  visibility = ['//visibility:public'],
-  srcs = [
-    'shape_detection.cc',
+  hdrs = [
+    'shape_detector.h',
   ],
   deps = cpu_select({
     'amd64': [
@@ -54,20 +24,12 @@ cc_binary(
 )
 
 cc_binary(
-  name = 'streaming_shape_detection',
+  name = 'target_spotter',
   visibility = ['//visibility:public'],
   srcs = [
-    'streaming_shape_detection.cc',
+    'target_spotter.cc',
   ],
-  deps = cpu_select({
-    'amd64': [
-      '//external:opencv'
-    ],
-    'raspi': [
-      '//external:opencv'
-    ],
-  }),
-  copts = [
-    '-Wno-cast-align',
+  deps = [
+    ':shape_detector_lib',
   ],
 )
