@@ -1,4 +1,4 @@
-workspace(name = 'org_frc971')
+workspace(name = 'org_UCLA_AIAA_UAS')
 
 new_local_repository(
   name = 'usr_repo',
@@ -25,17 +25,6 @@ new_git_repository(
   commit = 'e810a0b88e864dbcdb8c750f65ec454f65c56a3a',
 )
 
-# Recompressed version of the one downloaded from Linaro at
-# <https://releases.linaro.org/15.05/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.05-x86_64_arm-linux-gnueabihf.tar.xz>,
-# with workarounds for <https://github.com/bazelbuild/bazel/issues/574> and the
-# top-level folder stripped off.
-new_http_archive(
-  name = 'linaro_linux_gcc_4_9_repo',
-  build_file = 'compilers/linaro_linux_gcc_4.9.BUILD',
-  sha256 = '25e97bcb0af4fd7cd626d5bb1b303c7d2cb13acf2474e335e3d431d1a53fbb52',
-  url = 'http://frc971.org/Build-Dependencies/gcc-linaro-4.9-2015.05-x86_64_arm-linux-gnueabihf.tar.gz',
-)
-
 new_git_repository(
   name = 'python_gflags_repo',
   remote = 'https://github.com/gflags/python-gflags.git',
@@ -59,29 +48,6 @@ new_http_archive(
 bind(
   name = 'python-glog',
   actual = '@python_glog_repo//:glog',
-)
-
-new_http_archive(
-  name = 'allwpilib_ni_libraries_repo',
-  build_file = 'debian/ni-libraries.BUILD',
-  sha256 = '821687afbee2d7531fb3e47d8d58ac10005695e59685be3ac3aa00b3179faf52',
-  url = 'http://frc971.org/Build-Dependencies/allwpilib_ni-libraries_20749ed.tar.gz',
-  strip_prefix = 'ni-libraries',
-)
-
-bind(
-  name = 'ni-libraries',
-  actual = '@allwpilib_ni_libraries_repo//:ni-libraries',
-)
-
-# Downloaded from:
-# https://pypi.python.org/packages/source/s/six/six-1.10.0.tar.gz
-new_http_archive(
-  name = 'six_repo',
-  build_file = 'debian/six.BUILD',
-  sha256 = '105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a',
-  url = 'http://frc971.org/Build-Dependencies/six-1.10.0.tar.gz',
-  strip_prefix = 'six-1.10.0',
 )
 
 # For protobuf. Don't use these.
