@@ -16,7 +16,7 @@ class ShapeDetector {
   ::std::vector<::std::vector<::cv::Point>> ProcessImage(::cv::Mat frame);
 
  private:
-  ::cv::Mat Threshold(::cv::Mat frame);
+  ::cv::Mat Threshold(::cv::Mat frame, int channel);
 };
 
 }  // namespace shape_detector
