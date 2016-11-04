@@ -9,6 +9,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+#include "vision/util/shape_detector.h"
+
 namespace vision {
 namespace target_spotter {
 class TargetSpotter {

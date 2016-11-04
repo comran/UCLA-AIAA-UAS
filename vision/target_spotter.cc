@@ -1,13 +1,5 @@
 #include "vision/target_spotter.h"
 
-#include <iostream>
-
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
-#include "vision/shape_detector.h"
-
 namespace vision {
 namespace target_spotter {
 TargetSpotter::TargetSpotter() : camera_(0) {}

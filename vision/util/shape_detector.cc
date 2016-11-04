@@ -1,12 +1,4 @@
-#include "shape_detector.h"
-
-#include <iostream>
-#include <vector>
-#include <cmath>
-
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "vision/util/shape_detector.h"
 
 namespace vision {
 namespace shape_detector {
@@ -52,7 +44,7 @@ void ShapeDetector::ProcessImage(
   return filtered_frame;
 }
 
-// Returns whether a contours is good or not based off some sort of filter.
+// Returns whether a contour is good or not based off some sort of filter.
 bool ShapeDetector::ApproveContour(::std::vector<::cv::Point> contour) {
   double area = ::cv::contourArea(contour, false);
 

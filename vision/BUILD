@@ -1,25 +1,12 @@
 package(default_visibility = ['//visibility:public'])
 
 cc_library(
-  name = 'shape_detector_lib',
-  srcs = ['shape_detector.cc',],
-  hdrs = ['shape_detector.h',],
-
-  deps = [
-    '//external:opencv'
-  ],
-  copts = [
-    '-Wno-cast-align',
-  ],
-)
-
-cc_library(
   name = 'target_spotter_lib',
   srcs = ['target_spotter.cc',],
   hdrs = ['target_spotter.h',],
 
   deps = [
-    ':shape_detector_lib',
+    '//vision/util:shape_detector_lib',
   ],
 )
 
