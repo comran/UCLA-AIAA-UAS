@@ -20,10 +20,6 @@ config_setting(
   values = {'cpu': 'raspi'},
 )
 config_setting(
-  name = 'cpu_armhf',
-  values = {'cpu': 'armhf-debian'},
-)
-config_setting(
   name = 'has_asan',
   values = {'copt': '-fsanitize=address'},
 )

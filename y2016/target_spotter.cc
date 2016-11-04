@@ -65,7 +65,7 @@ void stream() {
 
     show_frame("Output frame", original_frame);
 
-    ::cv::waitKey(10);
+    ::cv::waitKey(100);
   }
 }
 
