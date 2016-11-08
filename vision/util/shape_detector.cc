@@ -41,6 +41,10 @@ void ShapeDetector::ProcessImage(
   ::cv::blur(filtered_frame, filtered_frame, ::cv::Size(3, 3));
   ::cv::Canny(filtered_frame, filtered_frame, 50, 100, 3);
 
+  ::cv::namedWindow("Threshold channel #" + ::std::to_string(channel));
+  ::cv::imshow("Threshold channel #" + ::std::to_string(channel),
+               filtered_frame);
+
   return filtered_frame;
 }
 
