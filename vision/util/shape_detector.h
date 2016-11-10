@@ -13,11 +13,11 @@ namespace shape_detector {
 class ShapeDetector {
  public:
   ShapeDetector();
-  void ProcessImage(::cv::Mat frame,
+  void ProcessImage(::cv::Mat &frame,
                     ::std::vector<::std::vector<::cv::Point>> &shapes);
 
  private:
-  ::cv::Mat Threshold(::cv::Mat frame, int channel);
+  void Threshold(::cv::Mat &frame, ::cv::Mat *filtered_frames);
   bool ApproveContour(::std::vector<::cv::Point> contour);
   void OutlineContours(::cv::Mat &frame,
                        ::std::vector<::std::vector<::cv::Point>> &contours);

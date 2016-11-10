@@ -23,7 +23,8 @@ void TargetSpotter::operator()() {
     ::cv::namedWindow("Output");
     ::cv::imshow("Output", frame);
 
-    ::cv::waitKey(10);
+    const int frames_per_second = 30;
+    ::cv::waitKey(1000 / frames_per_second);
   }
 }
 
