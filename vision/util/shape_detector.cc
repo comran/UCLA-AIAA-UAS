@@ -39,9 +39,22 @@ void ShapeDetector::Threshold(::cv::Mat &frame, ::cv::Mat *filtered_frames) {
   for (int i = 0; i < 3; i++) {
     ::cv::extractChannel(frame, filtered_frames[i], 2 - i /* to convert BGR */);
 
-    ::cv::blur(filtered_frames[i], filtered_frames[i], ::cv::Size(3, 3));
-    ::cv::Canny(filtered_frames[i], filtered_frames[i], 50, 100, 3);
+    // Blur channel to deal with camera noise.
+    ::cv::GaussianBlur(filtered_frames[i], filtered_frames[i], ::cv::Size(3, 3),
+                       0, 0);
 
+    // Dynamic canny edge filter with automatic threshold values.
+    ::cv::Mat temp_frame;  // Required for ::cv::threshold to work.
+    double high_canny_threshold =
+        ::cv::threshold(filtered_frames[i], temp_frame, 0, 255,
+                        CV_THRESH_BINARY | CV_THRESH_OTSU);
+    temp_frame.release();
+    ::cv::Canny(filtered_frames[i], filtered_frames[i], high_canny_threshold,
+                0.5 * high_canny_threshold);
+    ::cv::dilate(filtered_frames[i], filtered_frames[i], ::cv::Mat(),
+                 ::cv::Point(-1, -1));
+
+    // Display the channel edges for debugging.
     ::std::string window_name = "Threshold channel ";
     window_name += channels[i];
     ::cv::namedWindow(window_name);
@@ -51,8 +64,9 @@ void ShapeDetector::Threshold(::cv::Mat &frame, ::cv::Mat *filtered_frames) {
 
 // Returns whether a contour is good or not based off some sort of filter.
 bool ShapeDetector::ApproveContour(::std::vector<::cv::Point> contour) {
-  double area = ::cv::contourArea(contour, false);
+  return true;  // Show all contours for debugging purposes.
 
+  double area = ::cv::contourArea(contour, false);
   return !(area < 80 || area > 10000);
 }
 
