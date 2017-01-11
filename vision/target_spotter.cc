@@ -1,5 +1,7 @@
 #include "vision/target_spotter.h"
 
+#include <thread>
+
 namespace vision {
 namespace target_spotter {
 TargetSpotter::TargetSpotter() : camera_(0) {}
@@ -30,3 +32,39 @@ void TargetSpotter::operator()() {
 
 }  // namespace target_spotter
 }  // namespace vision
+
+int main(int argc, char** argv) {
+  if(argc > 0) {
+    ::cv::Mat frame = ::cv::imread(argv[1]);
+
+    ::cv::namedWindow("Original");
+    ::cv::imshow("Original", frame);
+
+    ::vision::shape_detector::ShapeDetector shape_detector;
+
+    ::std::vector<::std::vector<::cv::Point>> shapes;
+    shape_detector.ProcessImage(frame, shapes);
+
+    ::cv::namedWindow("Output");
+    ::cv::imshow("Output", frame);
+
+    ::cv::waitKey(0);
+
+    return 0;
+  }
+
+  // Feed in stream from camera.
+  ::vision::target_spotter::TargetSpotter target_spotter;
+  ::std::thread target_spotter_thread(::std::ref(target_spotter));
+
+  // Wait forever.
+  while (true) {
+    const int r = select(0, nullptr, nullptr, nullptr, nullptr);
+    (void) r;
+  }
+
+  target_spotter.Quit();
+  target_spotter_thread.join();
+
+  return 0;
+}
