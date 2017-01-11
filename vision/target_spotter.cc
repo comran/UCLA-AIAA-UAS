@@ -24,6 +24,7 @@ void TargetSpotter::operator()() {
 
     ::cv::namedWindow("Output");
     ::cv::imshow("Output", frame);
+    ::cv::moveWindow("Output", 0, frame.rows);
 
     const int frames_per_second = 30;
     ::cv::waitKey(1000 / frames_per_second);
@@ -34,7 +35,8 @@ void TargetSpotter::operator()() {
 }  // namespace vision
 
 int main(int argc, char** argv) {
-  if(argc > 0) {
+  // Handle processing targets in an image file.
+  if(argc > 1) {
     ::cv::Mat frame = ::cv::imread(argv[1]);
 
     ::cv::namedWindow("Original");
@@ -47,6 +49,7 @@ int main(int argc, char** argv) {
 
     ::cv::namedWindow("Output");
     ::cv::imshow("Output", frame);
+    ::cv::moveWindow("Output", 0, frame.rows);
 
     ::cv::waitKey(0);
 

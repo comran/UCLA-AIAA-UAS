@@ -8,6 +8,10 @@ ShapeDetector::ShapeDetector() {}
 // Find shapes in the given image and trace them out in the frame.
 void ShapeDetector::ProcessImage(
     ::cv::Mat &frame, ::std::vector<::std::vector<::cv::Point>> &shapes) {
+  ::cv::Mat hexagon_mat = ::cv::imread("./shapes/hexagon.jpg");
+  ::cv::Mat hexagon_filtered_frames[3];
+  Threshold(hexagon_mat, hexagon_filtered_frames);
+
   ::cv::Mat filtered_frames[3];
   Threshold(frame, filtered_frames);
 
@@ -24,6 +28,32 @@ void ShapeDetector::ProcessImage(
 
       ::cv::approxPolyDP(contour, contour, 2, true);
       shapes.push_back(contour);
+    }
+  }
+
+  ::std::vector<::std::vector<::cv::Point>> hexagon_contours;
+  ::std::vector<::cv::Vec4i> hexagon_hierarchy;
+  ::cv::findContours(hexagon_filtered_frames[0], hexagon_contours,
+                     hexagon_hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+  ::std::cout << shapes.size() << " shapes\n";
+  for (size_t i = 0; i < shapes.size(); i++) {
+    double area = ::cv::contourArea(shapes[i]);
+    if(area < 5) {
+      shapes.erase(shapes.begin() + i);
+      i--;
+
+      continue;
+    }
+    double similarity =
+        ::cv::matchShapes(shapes[i], hexagon_contours[0], 1, 0.0);
+
+    if (similarity > 0.01) {
+      shapes.erase(shapes.begin() + i);
+      i--;
+    } else {
+      ::std::cout << "i: " << i << " area: " << area
+                  << " similarity: " << similarity << ::std::endl;
     }
   }
 
@@ -58,6 +88,8 @@ void ShapeDetector::Threshold(::cv::Mat &frame, ::cv::Mat *filtered_frames) {
     ::std::string window_name = "Threshold channel ";
     window_name += channels[i];
     ::cv::namedWindow(window_name);
+    ::cv::moveWindow(window_name, filtered_frames[0].cols,
+                     filtered_frames[0].rows * i);
     ::cv::imshow(window_name, filtered_frames[i]);
   }
 }
