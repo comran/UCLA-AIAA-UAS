@@ -1,4 +1,4 @@
-#include "vision/target_spotter.h"
+#include "target_spotter.h"
 
 #include <thread>
 

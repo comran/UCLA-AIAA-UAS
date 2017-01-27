@@ -107,7 +107,7 @@ filegroup(
 filegroup(
   name = 'clang-symlinks',
   srcs = glob([
-    'clang_more_libs/**',
+    'clang_more_libs/**/*',
     'clang_syroot/**',
   ]),
 )

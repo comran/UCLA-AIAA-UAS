@@ -254,49 +254,47 @@ toolchain {
   target_system_name: "raspi"
   toolchain_identifier: "raspi_linux"
 
-  tool_path { name: "ar" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-ar" }
-  tool_path { name: "compat-ld" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-ld" }
-  tool_path { name: "cpp" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-cpp" }
-  tool_path { name: "dwp" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-dwp" }
-  tool_path { name: "gcc" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-gcc" }
-  tool_path { name: "gcov" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-gcov" }
+  tool_path { name: "ar" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-ar" }
+  tool_path { name: "compat-ld" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-ld" }
+  tool_path { name: "cpp" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-cpp" }
+  tool_path { name: "dwp" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-dwp" }
+  tool_path { name: "gcc" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-gcc" }
+  tool_path { name: "gcov" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-gcov" }
   # C(++) compiles invoke the compiler (as that is the one knowing where
   # to find libraries), but we provide LD so other rules can invoke the linker.
-  tool_path { name: "ld" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-ld" }
-  tool_path { name: "nm" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-nm" }
-  tool_path { name: "objcopy" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-objcopy" }
+  tool_path { name: "ld" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-ld" }
+  tool_path { name: "nm" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-nm" }
+  tool_path { name: "objcopy" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-objcopy" }
   objcopy_embed_flag: "-I"
   objcopy_embed_flag: "binary"
-  tool_path { name: "objdump" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-objdump" }
-  tool_path { name: "strip" path: "gcc_linaro_arm_linux_gnueabihf_raspbian/arm-linux-gnueabihf-strip" }
+  tool_path { name: "objdump" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-objdump" }
+  tool_path { name: "strip" path: "arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf-strip" }
 
-  compiler_flag: "--sysroot=external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/usr/include"
+  compiler_flag: "--sysroot=external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/sysroot/usr/include"
+  compiler_flag: "-nostdinc"
   compiler_flag: "-mfloat-abi=hard"
 
-  compiler_flag: "-nostdinc"
   compiler_flag: "-isystem"
-  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/lib/gcc/arm-linux-gnueabihf/4.8.3/include"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.3"
   compiler_flag: "-isystem"
-  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/lib/gcc/arm-linux-gnueabihf/4.8.3/include-fixed"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.3/arm-linux-gnueabihf"
   compiler_flag: "-isystem"
-  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/usr/include"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/sysroot/usr/include"
   compiler_flag: "-isystem"
-  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/usr/include/arm-linux-gnueabihf"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/include"
   compiler_flag: "-isystem"
-  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/include/c++/4.8.3"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/include"
   compiler_flag: "-isystem"
-  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/include/c++/4.8.3/arm-linux-gnueabihf"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/4.9.3/include"
+  compiler_flag: "-isystem"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/4.9.3/install-tools/include"
+  compiler_flag: "-isystem"
+  compiler_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/4.9.3/plugin/include"
 
   cxx_flag: "-isystem"
-  cxx_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/include/c++/4.8.3"
-  cxx_flag: "-isystem"
-  cxx_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/include/c++/4.8.3/arm-linux-gnueabihf"
-  cxx_flag: "-isystem"
-  cxx_flag: "external/gcc_linaro_arm_linux_gnueabihf_raspbian_repo/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/usr/include"
-
-  cxx_builtin_include_directory: "%package(@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/include)%"
-  cxx_builtin_include_directory: "%package(@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/include)%/c++/4.8.3"
-  cxx_builtin_include_directory: "%package(@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/usr/include)%"
+  cxx_builtin_include_directory: "%package(@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/include)%"
+  cxx_builtin_include_directory: "%package(@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/include)%/c++/4.9.3"
+  cxx_builtin_include_directory: "%package(@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include)%"
 
   linker_flag: "-lstdc++"
 
@@ -386,9 +384,6 @@ toolchain {
     }
   }
 
-  # Anticipated future default.
-  # This makes GCC and Clang do what we want when called through symlinks.
-#  unfiltered_cxx_flag: "-no-canonical-prefixes"
   linker_flag: "-no-canonical-prefixes"
 
   # Things that the code wants defined.

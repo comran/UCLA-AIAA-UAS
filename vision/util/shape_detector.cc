@@ -1,16 +1,56 @@
-#include "vision/util/shape_detector.h"
+#include "shape_detector.h"
 
 namespace vision {
 namespace shape_detector {
+
+ShapeTemplate::ShapeTemplate(::std::string filename, double similarity_thres) {
+  name_ = filename;
+  similarity_thres_ = similarity_thres;
+
+  ::cv::Mat image = ::cv::imread(filename);
+  ::cv::cvtColor(image, image, CV_BGR2GRAY);
+  ::cv::threshold(image, image, 127, 255, 0);
+  ::cv::subtract(::cv::Scalar::all(255), image, image);
+
+  ::std::vector<::std::vector<::cv::Point>> contours;
+  ::std::vector<::cv::Vec4i> hierarchy;
+
+  ::cv::findContours(image, contours, hierarchy, CV_RETR_CCOMP,
+                     CV_CHAIN_APPROX_SIMPLE);
+  template_contour_ = contours.at(0);  // Assuming this is what we want.
+
+  ::cv::Mat dst = ::cv::Mat::zeros(image.rows, image.cols, CV_8UC3);
+  ::cv::Scalar color(255, 0, 0);
+
+  /*
+  drawContours(dst, contours, 0, color, CV_FILLED, 8, hierarchy );
+  ::cv::namedWindow(filename, 1);
+  ::cv::imshow(filename, dst);
+  //*/
+}
+
+double ShapeTemplate::FindSimilarity(::std::vector<::cv::Point> contour) {
+  double similarity = ::cv::matchShapes(contour, template_contour_, 3, 0.0);
+
+  return similarity < similarity_thres_
+             ? similarity
+             : ::std::numeric_limits<double>::infinity();
+}
+
+::std::string ShapeTemplate::name() { return name_; }
 
 ShapeDetector::ShapeDetector() {}
 
 // Find shapes in the given image and trace them out in the frame.
 void ShapeDetector::ProcessImage(
     ::cv::Mat &frame, ::std::vector<::std::vector<::cv::Point>> &shapes) {
-  ::cv::Mat hexagon_mat = ::cv::imread("./shapes/hexagon.jpg");
-  ::cv::Mat hexagon_filtered_frames[3];
-  Threshold(hexagon_mat, hexagon_filtered_frames);
+  ::std::vector<ShapeTemplate> shape_templates;
+  shape_templates.push_back(ShapeTemplate("./shapes/hexagon.jpg", 1e-3));
+  shape_templates.push_back(ShapeTemplate("./shapes/star.jpg", 1e-1));
+  shape_templates.push_back(ShapeTemplate("./shapes/triangle.jpg", 1e1));
+//  shape_templates.push_back(ShapeTemplate("./shapes/semicircle.png", 7e-2));
+//  shape_templates.push_back(ShapeTemplate("./shapes/diamond.png"));
+//  shape_templates.push_back(ShapeTemplate("./shapes/plus.jpg", 1e-2));
 
   ::cv::Mat filtered_frames[3];
   Threshold(frame, filtered_frames);
@@ -31,33 +71,57 @@ void ShapeDetector::ProcessImage(
     }
   }
 
-  ::std::vector<::std::vector<::cv::Point>> hexagon_contours;
-  ::std::vector<::cv::Vec4i> hexagon_hierarchy;
-  ::cv::findContours(hexagon_filtered_frames[0], hexagon_contours,
-                     hexagon_hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-
   ::std::cout << shapes.size() << " shapes\n";
+  ::std::vector<::std::vector<::std::vector<::cv::Point>>> shape_matches;
+  for (size_t i = 0; i < shape_templates.size(); i++) {
+    shape_matches.push_back(::std::vector<::std::vector<::cv::Point>>());
+  }
+
   for (size_t i = 0; i < shapes.size(); i++) {
     double area = ::cv::contourArea(shapes[i]);
-    if(area < 5) {
+    if (area < 500) {
       shapes.erase(shapes.begin() + i);
       i--;
 
       continue;
     }
-    double similarity =
-        ::cv::matchShapes(shapes[i], hexagon_contours[0], 1, 0.0);
 
-    if (similarity > 0.01) {
+    double lowest_similarity = ::std::numeric_limits<double>::infinity();
+    int most_similar_shape_index = 0;
+    for (size_t j = 0; j < shape_templates.size(); j++) {
+      double similarity = shape_templates[j].FindSimilarity(shapes[i]);
+
+      if (similarity < lowest_similarity) {
+        lowest_similarity = similarity;
+        most_similar_shape_index = j;
+      }
+    }
+
+    const double similarity_thres = 1e5;
+    if (lowest_similarity > similarity_thres) {
       shapes.erase(shapes.begin() + i);
       i--;
     } else {
-      ::std::cout << "i: " << i << " area: " << area
-                  << " similarity: " << similarity << ::std::endl;
+      ::std::cout << "i: " << i << " area: " << area << " type: "
+                  << shape_templates[most_similar_shape_index].name()
+                  << " similarity: " << lowest_similarity << ::std::endl;
+
+      shape_matches[most_similar_shape_index].push_back(shapes[i]);
     }
   }
 
-  OutlineContours(frame, shapes);
+  ::std::vector<::cv::Scalar> colors;
+  colors.push_back(::cv::Scalar(255, 0, 0));
+  colors.push_back(::cv::Scalar(0, 255, 0));
+  colors.push_back(::cv::Scalar(0, 0, 255));
+  colors.push_back(::cv::Scalar(255, 255, 0));
+  colors.push_back(::cv::Scalar(0, 255, 255));
+  colors.push_back(::cv::Scalar(255, 0, 255));
+  colors.push_back(::cv::Scalar(255, 255, 255));
+  for (size_t i = 0; i < shape_matches.size(); i++) {
+    OutlineContours(frame, shape_matches[i], colors[i]);
+  }
+  // OutlineContours(frame, shape_matches[3], ::cv::Scalar(255, 0, 255));
 }
 
 // Trace out the edges in a colored image for RGB channels.
@@ -88,8 +152,8 @@ void ShapeDetector::Threshold(::cv::Mat &frame, ::cv::Mat *filtered_frames) {
     ::std::string window_name = "Threshold channel ";
     window_name += channels[i];
     ::cv::namedWindow(window_name);
-    ::cv::moveWindow(window_name, filtered_frames[0].cols,
-                     filtered_frames[0].rows * i);
+    /*::cv::moveWindow(window_name, 300 + filtered_frames[0].cols,
+                     filtered_frames[0].rows * i);*/
     ::cv::imshow(window_name, filtered_frames[i]);
   }
 }
@@ -104,15 +168,14 @@ bool ShapeDetector::ApproveContour(::std::vector<::cv::Point> contour) {
 
 // Trace out contours on the given image.
 void ShapeDetector::OutlineContours(
-    ::cv::Mat &frame, ::std::vector<::std::vector<::cv::Point>> &contours) {
+    ::cv::Mat &frame, ::std::vector<::std::vector<::cv::Point>> &contours,
+    ::cv::Scalar color) {
   for (size_t i = 0; i < contours.size(); i++) {
-    ::cv::Scalar color(0, 0, 255);
-
     for (size_t j = 0; j < contours.at(i).size(); j++) {
       ::cv::Point from = contours.at(i).at(j);
       ::cv::Point to = contours.at(i).at((j + 1) % contours.at(i).size());
 
-      ::cv::line(frame, from, to, color, 4);
+      ::cv::line(frame, from, to, color, 1);
     }
   }
 }

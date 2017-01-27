@@ -22,7 +22,7 @@ new_git_repository(
   name = 'gcc_linaro_arm_linux_gnueabihf_raspbian_repo',
   remote = 'https://github.com/raspberrypi/tools.git',
   build_file = 'compilers/gcc_linaro_arm_linux_gnueabihf_raspbian.BUILD',
-  commit = 'e810a0b88e864dbcdb8c750f65ec454f65c56a3a',
+  commit = 'd820ab9c21969013b4e56c7e9cba25518afcdd44',
 )
 
 new_git_repository(
@@ -72,11 +72,15 @@ new_http_archive(
 )
 
 git_repository(
-    name   = "precompiled_opencv_git",
-    commit = "b90312818062fcad759e33294bb8d99c322aa333",
-    remote = "https://github.com/comran/opencv-3.1.0-precompiled.git"
+    name   = 'precompiled_opencv_git',
+    remote = 'https://github.com/comran/opencv-3.1.0-precompiled.git',
+    commit = 'aba1effab3ab2b27ede94131b7f34a60e2af6ecd',
 )
 bind(
     name   = "opencv",
     actual = "@precompiled_opencv_git//:opencv_lib",
+)
+bind(
+    name   = "opencv_raspi",
+    actual = "@precompiled_opencv_git//:opencv_raspi_lib",
 )

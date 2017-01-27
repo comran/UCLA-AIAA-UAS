@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <limits>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -10,6 +11,18 @@
 
 namespace vision {
 namespace shape_detector {
+class ShapeTemplate {
+ public:
+  ShapeTemplate(::std::string filename, double similarity_thres);
+  double FindSimilarity(::std::vector<::cv::Point> contour);
+  ::std::string name();
+
+ private:
+  ::std::vector<::cv::Point> template_contour_;
+  ::std::string name_;
+  double similarity_thres_;
+};
+
 class ShapeDetector {
  public:
   ShapeDetector();
@@ -20,7 +33,8 @@ class ShapeDetector {
   void Threshold(::cv::Mat &frame, ::cv::Mat *filtered_frames);
   bool ApproveContour(::std::vector<::cv::Point> contour);
   void OutlineContours(::cv::Mat &frame,
-                       ::std::vector<::std::vector<::cv::Point>> &contours);
+                       ::std::vector<::std::vector<::cv::Point>> &contours,
+                       ::cv::Scalar color);
 };
 
 }  // namespace shape_detector

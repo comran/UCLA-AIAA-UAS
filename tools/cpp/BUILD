@@ -5,15 +5,6 @@ cc_library(
   srcs = [ 'empty_main.c' ],
 )
 
-#cc_library(
-#  name = 'malloc',
-#  deps = select({
-#    '//tools:has_asan': [],
-#    '//tools:has_tsan': [],
-#    '//conditions:default': ['//third_party/gperftools:tcmalloc'],
-#  }),
-#)
-
 cc_library(
   name = 'stl',
 )
@@ -75,8 +66,8 @@ cc_toolchain(
 filegroup(
   name = 'raspi-gcc-files',
   srcs = [
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang-symlinks',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:tool-wrappers',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:clang-symlinks',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:tool-wrappers',
     '@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//:compiler_pieces',
   ],
 )
@@ -84,11 +75,11 @@ filegroup(
 filegroup(
   name = 'linaro_linux_linker_files',
   srcs = [
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:gcc',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:ld',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:ar',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang-ld',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:gcc',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:ld',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:ar',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:clang-ld',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:clang',
     '@gcc_linaro_arm_linux_gnueabihf_raspbian_repo//:compiler_pieces',
   ],
 )
@@ -96,10 +87,10 @@ filegroup(
 filegroup(
   name = 'linaro_linux_compiler_files',
   srcs = [
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:gcc',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:ld',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:clang',
-    '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:as',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:gcc',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:ld',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:clang',
+    '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:as',
   ],
 )
 
@@ -111,8 +102,8 @@ cc_toolchain(
   dwp_files = ':empty',
   dynamic_runtime_libs = [':empty'],
   linker_files = ':linaro_linux_linker_files',
-  objcopy_files = '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:objcopy',
+  objcopy_files = '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:objcopy',
   static_runtime_libs = [':empty'],
-  strip_files = '//tools/cpp/gcc_linaro_arm_linux_gnueabihf_raspbian:strip',
+  strip_files = '//tools/cpp/arm-rpi-4.9.3-linux-gnueabihf:strip',
   supports_param_files = 1,
 )
