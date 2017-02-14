@@ -14,17 +14,10 @@ void TargetSpotter::operator()() {
     ::cv::Mat frame;
     camera_ >> frame;
 
-    ::cv::namedWindow("Original");
-    ::cv::imshow("Original", frame);
-
     ::vision::shape_detector::ShapeDetector shape_detector;
 
     ::std::vector<::std::vector<::cv::Point>> shapes;
     shape_detector.ProcessImage(frame, shapes);
-
-    ::cv::namedWindow("Output");
-    ::cv::imshow("Output", frame);
-    ::cv::moveWindow("Output", 0, frame.rows);
 
     const int frames_per_second = 30;
     ::cv::waitKey(1000 / frames_per_second);
@@ -39,17 +32,10 @@ int main(int argc, char** argv) {
   if(argc > 1) {
     ::cv::Mat frame = ::cv::imread(argv[1]);
 
-    ::cv::namedWindow("Original");
-    ::cv::imshow("Original", frame);
-
     ::vision::shape_detector::ShapeDetector shape_detector;
 
     ::std::vector<::std::vector<::cv::Point>> shapes;
     shape_detector.ProcessImage(frame, shapes);
-
-    ::cv::namedWindow("Output");
-    ::cv::imshow("Output", frame);
-    ::cv::moveWindow("Output", 0, frame.rows);
 
     ::cv::waitKey(0);
 

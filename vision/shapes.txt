@@ -1,0 +1,5 @@
+diamond
+star
+rectangle
+triangle
+

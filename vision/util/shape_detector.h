@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <iomanip>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -32,7 +33,7 @@ class ShapeDetector {
  private:
   void Threshold(::cv::Mat &frame, ::cv::Mat *filtered_frames);
   bool ApproveContour(::std::vector<::cv::Point> contour);
-  void OutlineContours(::cv::Mat &frame,
+  void OutlineContours(::cv::Mat &frame, ::cv::Mat original_frame,
                        ::std::vector<::std::vector<::cv::Point>> &contours,
                        ::cv::Scalar color);
 };

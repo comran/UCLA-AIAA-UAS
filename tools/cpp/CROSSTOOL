@@ -161,7 +161,7 @@ toolchain {
   compiler_flag: "-D__STDC_LIMIT_MACROS"
   compiler_flag: "-D_FILE_OFFSET_BITS=64"
   # TODO(Brian): Rename this or something.
-  compiler_flag: "-DAOS_ARCHITECTURE_arm_frc"
+  compiler_flag: "-DDESKTOP_ENVIRONMENT"
 
   linker_flag: "-fuse-ld=gold"
 
