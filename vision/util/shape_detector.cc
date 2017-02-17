@@ -137,6 +137,7 @@ void ShapeDetector::OutlineContours(
       crop_cut.setTo(::cv::Scalar(0, 0, 0));
       original_frame.copyTo(crop_cut, mask);
       crop_cut = crop_cut(bounding_rect);
+      ::cv::Mat mask_cut = mask(bounding_rect);
 
       ::cv::normalize(mask.clone(), mask, 0.0, 255.0, CV_MINMAX, CV_8UC1);
 #ifdef DESKTOP_ENVIRONMENT
@@ -168,11 +169,11 @@ void ShapeDetector::OutlineContours(
         ::cv::Mat b_hist, g_hist, r_hist;
 
         /// Compute the histograms:
-        ::cv::calcHist(&bgr_planes[0], 1, 0, ::cv::Mat(), b_hist, 1, &histSize,
+        ::cv::calcHist(&bgr_planes[0], 1, 0, mask_cut, b_hist, 1, &histSize,
                        &histRange, uniform, accumulate);
-        ::cv::calcHist(&bgr_planes[1], 1, 0, ::cv::Mat(), g_hist, 1, &histSize,
+        ::cv::calcHist(&bgr_planes[1], 1, 0, mask_cut, g_hist, 1, &histSize,
                        &histRange, uniform, accumulate);
-        ::cv::calcHist(&bgr_planes[2], 1, 0, ::cv::Mat(), r_hist, 1, &histSize,
+        ::cv::calcHist(&bgr_planes[2], 1, 0, mask_cut, r_hist, 1, &histSize,
                        &histRange, uniform, accumulate);
 
         // Draw the histograms for B, G and R
