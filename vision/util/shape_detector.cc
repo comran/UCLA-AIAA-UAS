@@ -97,19 +97,6 @@ void ContourFilter::ContourHistogram(cv::Mat &original_frame,
     cv::normalize(hist[i], hist[i], 0, histImage.rows, cv::NORM_MINMAX, -1,
                   cv::Mat());
   }
-
-  /*
-  // Draw for each channel.
-  for (int i = 1; i < histSize; i++) {
-    for (int j = 0; j < 3; j++) {
-      cv::line(
-          histImage, cv::Point(bin_w * (i - 1),
-                               hist_h - cvRound(hist[j].at<float>(i - 1))),
-          cv::Point(bin_w * (i), hist_h - cvRound(hist[j].at<float>(i))),
-          cv::Scalar(j == 0 ? 255 : 0, j == 1 ? 255 : 0, j == 2 ? 255 : 0), 2,
-          8, 0);
-    }
-  }*/
 }
 
 void ContourFilter::NonMaximaSuppression(const cv::Mat &src, cv::Mat &mask,
