@@ -5,6 +5,8 @@
 #include <vector>
 #include <limits>
 #include <iomanip>
+#include <chrono>
+#include <mutex>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -12,6 +14,47 @@
 
 namespace vision {
 namespace shape_detector {
+
+// Class to track down slow algorithms and sections of the code.
+class Timer {
+ public:
+  Timer();
+  void tick();  // Print time since last tick or Timer construction.
+  void reset();  // Reset number printed before time since last tick.
+
+ private:
+  std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+  int count_;
+};
+
+// Multithreaded filter to run some rough tests on all the contours to narrow
+// down on the good ones.
+class ContourFilter {
+ public:
+  ContourFilter(cv::Mat &original_frame,
+                std::vector<std::vector<cv::Point>> &shapes,
+                std::vector<std::vector<cv::Point>> &good_shapes,
+                std::mutex &good_shapes_mutex,
+                size_t start_index, size_t end_index);
+  void operator()();
+
+  void ContourHistogram(cv::Mat &original_frame,
+                        std::vector<cv::Point> &contour, cv::Mat *hist);
+  void NonMaximaSuppression(const cv::Mat &src, cv::Mat &mask,
+                            const bool remove_plateaus);
+  void FindHistPeaks(cv::InputArray src, cv::OutputArray dst,
+                     const float scale = 0.2,
+                     const cv::Size &ksize = cv::Size(5, 5),
+                     const bool remove_plateus = true);
+
+ private:
+  cv::Mat &original_frame_;
+  std::vector<std::vector<cv::Point>> &shapes_;
+  std::vector<std::vector<cv::Point>> &good_shapes_;
+  size_t start_index_, end_index_;
+  std::mutex &good_shapes_mutex_;
+};
+
 class ShapeTemplate {
  public:
   ShapeTemplate(std::string filename, double similarity_thres);

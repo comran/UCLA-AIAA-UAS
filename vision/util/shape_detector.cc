@@ -6,168 +6,161 @@
 
 namespace vision {
 namespace shape_detector {
+// TODO(comran): Store all the contours in some nice struct and sort in a
+// priority queue based on our algorithm's confidence that the contour is a
+// target.
 
-class Timer {
- public:
-  Timer() : start(std::chrono::high_resolution_clock::now()), num(0) {}
-  void tick() {
-    auto finish = std::chrono::high_resolution_clock::now();
+Timer::Timer() : start_(std::chrono::high_resolution_clock::now()), count_(0) {}
 
-    double duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                          finish - start).count();
-    std::cout << num << ": " << duration << "\n";
-    start = std::chrono::high_resolution_clock::now();
-    num++;
-  }
-  void reset() { num = 0; }
+void Timer::tick() {
+  auto finish = std::chrono::high_resolution_clock::now();
 
- private:
-  std::chrono::time_point<std::chrono::high_resolution_clock> start;
-  int num;
-};
+  double duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        finish - start_).count();
 
-class ContourFilter {
- public:
-  ContourFilter(cv::Mat &original_frame,
-                std::vector<std::vector<cv::Point>> &shapes,
-                std::vector<std::vector<cv::Point>> &good_shapes,
-                size_t start_index, size_t end_index,
-                std::mutex &good_shapes_mutex)
-      : original_frame_(original_frame),
-        shapes_(shapes),
-        good_shapes_(good_shapes),
-        start_index_(start_index),
-        end_index_(end_index),
-        good_shapes_mutex_(good_shapes_mutex) {}
-  void operator()() {
-    for (size_t i = start_index_; i < end_index_; i++) {
-      cv::Mat hist[3];
-      ContourHistogram(original_frame_, shapes_.at(i), hist);
+  std::cout << count_ << ": " << duration << "\n";
 
-      cv::Mat peaks[3];
-      bool remove = false;
+  // Start counting time from now until tick is called again.
+  start_ = std::chrono::high_resolution_clock::now();
+  count_++;
+}
 
-      double area = cv::contourArea(shapes_.at(i));
-      if (area < 500) remove = true;
+void Timer::reset() { count_ = 0; }
 
-      for (int i = 0; !remove && i < 3; i++) {
-        FindHistPeaks(hist[2], peaks[i]);
-        if (peaks[i].rows != 1) {
-          remove = true;
-        }
-      }
+ContourFilter::ContourFilter(cv::Mat &original_frame,
+                             std::vector<std::vector<cv::Point>> &shapes,
+                             std::vector<std::vector<cv::Point>> &good_shapes,
+                             std::mutex &good_shapes_mutex,
+                             size_t start_index, size_t end_index)
+    : original_frame_(original_frame),
+      shapes_(shapes),
+      good_shapes_(good_shapes),
+      start_index_(start_index),
+      end_index_(end_index),
+      good_shapes_mutex_(good_shapes_mutex) {}
 
-      if (!remove) {
-        std::lock_guard<std::mutex> guard(good_shapes_mutex_);
-        good_shapes_.push_back(shapes_.at(i));
+void ContourFilter::operator()() {
+  for (size_t i = start_index_; i < end_index_; i++) {
+    cv::Mat hist[3];
+    ContourHistogram(original_frame_, shapes_.at(i), hist);
+
+    cv::Mat peaks[3];
+    bool remove = false;
+
+    double area = cv::contourArea(shapes_.at(i));
+    if (area < 100) remove = true;
+
+    for (int i = 0; !remove && i < 3; i++) {
+      FindHistPeaks(hist[2], peaks[i]);
+      if (peaks[i].rows != 1) {
+        remove = true;
       }
     }
-  }
 
-  void ContourHistogram(cv::Mat &original_frame,
-                        std::vector<cv::Point> &contour, cv::Mat *hist) {
-    cv::Mat mask =
-        cv::Mat::zeros(original_frame.rows, original_frame.cols, CV_8UC1);
-    cv::drawContours(mask, std::vector<std::vector<cv::Point>>(1, contour), -1,
-                     cv::Scalar(255), CV_FILLED);
-
-    cv::Rect bounding_rect = cv::boundingRect(mask);
-
-    cv::Mat crop_cut = original_frame(bounding_rect);
-    cv::Mat mask_cut = mask(bounding_rect);
-
-    // Split up color channels.
-    std::vector<cv::Mat> bgr_planes;
-    split(crop_cut, bgr_planes);
-
-    // Set the ranges (for B,G,R)
-    float range[] = {0, 256};
-    const float *histRange = {range};
-    const int histSize = 32;  // Number of bins.
-    int hist_w = 512;
-    int hist_h = 512;
-
-    cv::Mat histImage(hist_h, hist_w, CV_8UC3, cv::Scalar(0, 0, 0));
-
-    // Compute the histograms:
-    for (int i = 0; i < 3; i++) {
-      cv::calcHist(&bgr_planes[i], 1, 0, mask_cut, hist[i], 1, &histSize,
-                   &histRange, true, false);
-      cv::normalize(hist[i], hist[i], 0, histImage.rows, cv::NORM_MINMAX, -1,
-                    cv::Mat());
+    if (!remove) {
+      std::lock_guard<std::mutex> guard(good_shapes_mutex_);
+      good_shapes_.push_back(shapes_.at(i));
     }
+  }
+}
 
-    /*
-    // Draw for each channel.
-    for (int i = 1; i < histSize; i++) {
-      for (int j = 0; j < 3; j++) {
-        cv::line(
-            histImage, cv::Point(bin_w * (i - 1),
-                                 hist_h - cvRound(hist[j].at<float>(i - 1))),
-            cv::Point(bin_w * (i), hist_h - cvRound(hist[j].at<float>(i))),
-            cv::Scalar(j == 0 ? 255 : 0, j == 1 ? 255 : 0, j == 2 ? 255 : 0), 2,
-            8, 0);
-      }
-    }*/
+void ContourFilter::ContourHistogram(cv::Mat &original_frame,
+                                     std::vector<cv::Point> &contour,
+                                     cv::Mat *hist) {
+  cv::Mat mask =
+      cv::Mat::zeros(original_frame.rows, original_frame.cols, CV_8UC1);
+  cv::drawContours(mask, std::vector<std::vector<cv::Point>>(1, contour), -1,
+                   cv::Scalar(255), CV_FILLED);
+
+  cv::Rect bounding_rect = cv::boundingRect(mask);
+
+  cv::Mat crop_cut = original_frame(bounding_rect);
+  cv::Mat mask_cut = mask(bounding_rect);
+
+  // Split up color channels.
+  std::vector<cv::Mat> bgr_planes;
+  split(crop_cut, bgr_planes);
+
+  // Set the ranges (for B,G,R)
+  float range[] = {0, 256};
+  const float *histRange = {range};
+  const int histSize = 32;  // Number of bins.
+  int hist_w = 512;
+  int hist_h = 512;
+
+  cv::Mat histImage(hist_h, hist_w, CV_8UC3, cv::Scalar(0, 0, 0));
+
+  // Compute the histograms:
+  for (int i = 0; i < 3; i++) {
+    cv::calcHist(&bgr_planes[i], 1, 0, mask_cut, hist[i], 1, &histSize,
+                 &histRange, true, false);
+    cv::normalize(hist[i], hist[i], 0, histImage.rows, cv::NORM_MINMAX, -1,
+                  cv::Mat());
   }
 
-  void NonMaximaSuppression(const cv::Mat &src, cv::Mat &mask,
-                            const bool remove_plateaus) {
-    // Find pixels that are equal to the local neighborhood not maximum.
-    cv::dilate(src, mask, cv::Mat());
-    cv::compare(src, mask, mask, cv::CMP_GE);
-
-    if (!remove_plateaus) return;
-
-    // Remove pixels that are equal to the local minimum.
-    cv::Mat non_plateau_mask;
-    cv::erode(src, non_plateau_mask, cv::Mat());
-    cv::compare(src, non_plateau_mask, non_plateau_mask, cv::CMP_GT);
-    cv::bitwise_and(mask, non_plateau_mask, mask);
-  }
-
-  void FindHistPeaks(cv::InputArray src, cv::OutputArray dst,
-                     const float scale = 0.2,
-                     const cv::Size &ksize = cv::Size(5, 5),
-                     const bool remove_plateus = true) {
-    cv::Mat hist = src.getMat();
-
-    // Die if histogram image is not the correct type.
-    CV_Assert(hist.type() == CV_32F);
-
-    // Find the min and max values of the hist image.
-    double min_val, max_val;
-    minMaxLoc(hist, &min_val, &max_val);
-
-    cv::Mat mask;
-    GaussianBlur(hist, hist, ksize, 0);                // Smoothing.
-    NonMaximaSuppression(hist, mask, remove_plateus);  // Extract local maxima.
-
-    std::vector<cv::Point> maxima;
-    cv::findNonZero(mask, maxima);
-
-    for (std::vector<cv::Point>::iterator it = maxima.begin();
-         it != maxima.end();) {
-      cv::Point pnt = *it;
-      float val = hist.at<float>(pnt.y);
-
-      // Filter peaks
-      if ((val > max_val * scale))
-        it++;
-      else
-        it = maxima.erase(it);
+  /*
+  // Draw for each channel.
+  for (int i = 1; i < histSize; i++) {
+    for (int j = 0; j < 3; j++) {
+      cv::line(
+          histImage, cv::Point(bin_w * (i - 1),
+                               hist_h - cvRound(hist[j].at<float>(i - 1))),
+          cv::Point(bin_w * (i), hist_h - cvRound(hist[j].at<float>(i))),
+          cv::Scalar(j == 0 ? 255 : 0, j == 1 ? 255 : 0, j == 2 ? 255 : 0), 2,
+          8, 0);
     }
+  }*/
+}
 
-    cv::Mat(maxima).copyTo(dst);
+void ContourFilter::NonMaximaSuppression(const cv::Mat &src, cv::Mat &mask,
+                                         const bool remove_plateaus) {
+  // Find pixels that are equal to the local neighborhood not maximum.
+  cv::dilate(src, mask, cv::Mat());
+  cv::compare(src, mask, mask, cv::CMP_GE);
+
+  if (!remove_plateaus) return;
+
+  // Remove pixels that are equal to the local minimum.
+  cv::Mat non_plateau_mask;
+  cv::erode(src, non_plateau_mask, cv::Mat());
+  cv::compare(src, non_plateau_mask, non_plateau_mask, cv::CMP_GT);
+  cv::bitwise_and(mask, non_plateau_mask, mask);
+}
+
+void ContourFilter::FindHistPeaks(cv::InputArray src, cv::OutputArray dst,
+                                  const float scale,
+                                  const cv::Size &ksize,
+                                  const bool remove_plateus) {
+  cv::Mat hist = src.getMat();
+
+  // Die if histogram image is not the correct type.
+  CV_Assert(hist.type() == CV_32F);
+
+  // Find the min and max values of the hist image.
+  double min_val, max_val;
+  minMaxLoc(hist, &min_val, &max_val);
+
+  cv::Mat mask;
+  GaussianBlur(hist, hist, ksize, 0);                // Smoothing.
+  NonMaximaSuppression(hist, mask, remove_plateus);  // Extract local maxima.
+
+  std::vector<cv::Point> maxima;
+  cv::findNonZero(mask, maxima);
+
+  for (std::vector<cv::Point>::iterator it = maxima.begin();
+       it != maxima.end();) {
+    cv::Point pnt = *it;
+    float val = hist.at<float>(pnt.y);
+
+    // Filter peaks
+    if ((val > max_val * scale))
+      it++;
+    else
+      it = maxima.erase(it);
   }
 
- private:
-  cv::Mat &original_frame_;
-  std::vector<std::vector<cv::Point>> &shapes_;
-  std::vector<std::vector<cv::Point>> &good_shapes_;
-  size_t start_index_, end_index_;
-  std::mutex &good_shapes_mutex_;
-};
+  cv::Mat(maxima).copyTo(dst);
+}
 
 ShapeDetector::ShapeDetector() {}
 
@@ -175,12 +168,11 @@ ShapeDetector::ShapeDetector() {}
 void ShapeDetector::ProcessImage(cv::Mat &frame,
                                  std::vector<std::vector<cv::Point>> &shapes) {
   cv::Mat filtered_frames[3];
-  cv::Mat original_frame = frame.clone();
 
   Threshold(frame, filtered_frames);
   GenerateContours(shapes, filtered_frames);
-  FilterContours(original_frame, shapes);
-  OutlineContours(frame, original_frame, shapes, cv::Scalar(0, 255, 0));
+  FilterContours(frame, shapes);
+  OutlineContours(frame, frame, shapes, cv::Scalar(0, 255, 0));
 }
 
 // Trace out the edges in a colored image for RGB channels.
@@ -228,8 +220,7 @@ void ShapeDetector::GenerateContours(
 
 void ShapeDetector::FilterContours(
     cv::Mat &original_frame, std::vector<std::vector<cv::Point>> &shapes) {
-  // TODO(comran): Use lists instead of vectors for holding shapes?
-
+  Timer timer;
   std::cout << "START FILTER\n";
   std::vector<std::vector<cv::Point>> good_shapes;
   std::mutex good_shapes_mutex;
@@ -237,15 +228,16 @@ void ShapeDetector::FilterContours(
   std::vector<ContourFilter> contour_filters;
   std::vector<std::thread> contour_filter_threads;
 
-  const int kNumFilterThreads = 32;
+  const int kNumFilterThreads = 64;
   for (int i = 0; i < kNumFilterThreads; i++) {
     size_t start_index =
         static_cast<double>(shapes.size()) / kNumFilterThreads * i;
     size_t end_index =
         static_cast<double>(shapes.size()) / kNumFilterThreads * (i + 1);
+
     contour_filters.push_back(ContourFilter(original_frame, shapes, good_shapes,
-                                            start_index, end_index,
-                                            good_shapes_mutex));
+                                            good_shapes_mutex, start_index,
+                                            end_index));
     contour_filter_threads.push_back(std::thread(contour_filters.at(i)));
   }
 
@@ -255,6 +247,7 @@ void ShapeDetector::FilterContours(
 
   shapes = std::move(good_shapes);
   std::cout << "END FILTER\n";
+  timer.tick();
 }
 
 // Trace out contours on the given image.
@@ -286,7 +279,7 @@ void ShapeDetector::OutlineContours(
 #endif
   }
 #ifdef DESKTOP_ENVIRONMENT
-//  cv::waitKey(0);
+  cv::waitKey(0);
 #endif
 }
 
