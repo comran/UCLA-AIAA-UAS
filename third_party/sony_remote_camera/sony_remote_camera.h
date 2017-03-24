@@ -8,14 +8,8 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#ifdef SONY_CAPTURE_EXPORTS
-#define DLL __declspec(dllexport)
-#else
-#define DLL __declspec(dllimport)
-#endif
-
 namespace src {
-	DLL enum Sony_Capture_Error {
+	enum Sony_Capture_Error {
 		SC_NO_ERROR = 0,
 		SC_ERROR,
 		SC_NO_NEW_DATA_AVAILABLE,
@@ -35,6 +29,5 @@ namespace src {
 		virtual Sony_Capture_Error Set_Recording(bool start) = 0;
 	};
 
-	DLL Sony_Remote_Camera_Interface* GetSonyRemoteCamera(std::string my_own_ip);
-
+	Sony_Remote_Camera_Interface* GetSonyRemoteCamera(std::string my_own_ip);
 }

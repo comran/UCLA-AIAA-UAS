@@ -45,7 +45,7 @@ void SSDP_Client::Handle_Send_Discovery_Request(
         boost::bind(&SSDP_Client::Handle_Read_Header, this,
                     boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
-    timer.expires_from_now(boost::chrono::milliseconds(5000));
+    timer.expires_from_now(chrono::milliseconds(5000));
     timer.async_wait(boost::bind(&SSDP_Client::Handle_Discovery_Timeout, this,
                                  boost::asio::placeholders::error));
   }
