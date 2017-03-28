@@ -18,7 +18,7 @@ void Timer::tick() {
   double duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
                         finish - start_).count();
 
-  std::cout << count_ << ": " << duration << "\n";
+  std::cout << count_ << ": " << (duration / 1e9) << "\n";
 
   // Start counting time from now until tick is called again.
   start_ = std::chrono::high_resolution_clock::now();
@@ -30,14 +30,21 @@ void Timer::reset() { count_ = 0; }
 ContourFilter::ContourFilter(cv::Mat &original_frame,
                              std::vector<std::vector<cv::Point>> &shapes,
                              std::vector<std::vector<cv::Point>> &good_shapes,
-                             std::mutex &good_shapes_mutex,
-                             size_t start_index, size_t end_index)
+                             std::mutex &good_shapes_mutex, size_t start_index,
+                             size_t end_index)
     : original_frame_(original_frame),
       shapes_(shapes),
       good_shapes_(good_shapes),
       start_index_(start_index),
       end_index_(end_index),
-      good_shapes_mutex_(good_shapes_mutex) {}
+      good_shapes_mutex_(good_shapes_mutex) {
+  templates_.push_back(ShapeTemplate("./shapes/diamond.png"));
+  templates_.push_back(ShapeTemplate("./shapes/hexagon.jpg"));
+  templates_.push_back(ShapeTemplate("./shapes/plus.jpg"));
+  templates_.push_back(ShapeTemplate("./shapes/semicircle.png"));
+  templates_.push_back(ShapeTemplate("./shapes/star.jpg"));
+  templates_.push_back(ShapeTemplate("./shapes/triangle.jpg"));
+}
 
 void ContourFilter::operator()() {
   for (size_t i = start_index_; i < end_index_; i++) {
@@ -55,6 +62,30 @@ void ContourFilter::operator()() {
       if (peaks[i].rows != 1) {
         remove = true;
       }
+    }
+
+    if (!remove) {
+      cv::Mat mask =
+          cv::Mat::zeros(original_frame_.rows, original_frame_.cols, CV_8UC1);
+      cv::drawContours(mask, std::vector<std::vector<cv::Point>>(1, shapes_.at(i)), -1,
+                       cv::Scalar(255), CV_FILLED);
+
+#ifdef DESKTOP_ENVIRONMENT
+      cv::namedWindow(std::to_string(i), 1);
+      cv::imshow(std::to_string(i), mask);
+#endif
+
+
+      Timer timer;
+
+      std::cout << i << " ------------------\n";
+      for (size_t j = 0; j < templates_.size(); j++) {
+        std::cout << templates_.at(j).name() << ": "
+                  << templates_.at(j).FindSimilarity(shapes_.at(i)) << " ";
+      }
+      std::cout << std::endl;
+
+      timer.tick();
     }
 
     if (!remove) {
@@ -76,6 +107,7 @@ void ContourFilter::ContourHistogram(cv::Mat &original_frame,
 
   cv::Mat crop_cut = original_frame(bounding_rect);
   cv::Mat mask_cut = mask(bounding_rect);
+
 
   // Split up color channels.
   std::vector<cv::Mat> bgr_planes;
@@ -115,8 +147,7 @@ void ContourFilter::NonMaximaSuppression(const cv::Mat &src, cv::Mat &mask,
 }
 
 void ContourFilter::FindHistPeaks(cv::InputArray src, cv::OutputArray dst,
-                                  const float scale,
-                                  const cv::Size &ksize,
+                                  const float scale, const cv::Size &ksize,
                                   const bool remove_plateus) {
   cv::Mat hist = src.getMat();
 
@@ -270,9 +301,8 @@ void ShapeDetector::OutlineContours(
 #endif
 }
 
-ShapeTemplate::ShapeTemplate(std::string filename, double similarity_thres) {
+ShapeTemplate::ShapeTemplate(std::string filename) {
   name_ = filename;
-  similarity_thres_ = similarity_thres;
 
   cv::Mat image = cv::imread(filename);
   cv::cvtColor(image, image, CV_BGR2GRAY);
@@ -290,18 +320,18 @@ ShapeTemplate::ShapeTemplate(std::string filename, double similarity_thres) {
   cv::Scalar color(255, 0, 0);
 
   drawContours(dst, contours, 0, color, CV_FILLED, 8, hierarchy);
+/*
 #ifdef DESKTOP_ENVIRONMENT
   cv::namedWindow(filename, 1);
   cv::imshow(filename, dst);
 #endif
+*/
 }
 
 double ShapeTemplate::FindSimilarity(std::vector<cv::Point> contour) {
   double similarity = cv::matchShapes(contour, template_contour_, 3, 0.0);
 
-  return similarity < similarity_thres_
-             ? similarity
-             : std::numeric_limits<double>::infinity();
+  return similarity;
 }
 
 std::string ShapeTemplate::name() { return name_; }

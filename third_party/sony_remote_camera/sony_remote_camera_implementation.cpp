@@ -44,6 +44,7 @@ Sony_Remote_Camera_Implementation::Sony_Remote_Camera_Implementation(
 }
 
 Sony_Remote_Camera_Implementation::~Sony_Remote_Camera_Implementation() {
+  cout << "DECONSTRUCT\n";
   liveview_thread.interrupt();
   event_listener_thread.interrupt();
   socket_options.close();
@@ -418,9 +419,11 @@ void Sony_Remote_Camera_Implementation::Parse_Description() {
 Sony_Capture_Error Sony_Remote_Camera_Implementation::Get_Last_JPeg_Image(
     uint8_t *&data, size_t &size, int &frame_number, int &timestamp) {
   // return jpeg_image;
+  cout << "HERE1\n";
   liveview_mutex.lock();
   auto err = SC_NO_ERROR;
   if (this->data && !got_it) {
+    cout << "Got something...\n";
     data = this->data;
     size = file_size;
     frame_number = this->frame_number;

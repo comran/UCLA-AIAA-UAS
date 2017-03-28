@@ -27,6 +27,17 @@ class Timer {
   int count_;
 };
 
+class ShapeTemplate {
+ public:
+  ShapeTemplate(std::string filename);
+  double FindSimilarity(std::vector<cv::Point> contour);
+  std::string name();
+
+ private:
+  std::vector<cv::Point> template_contour_;
+  std::string name_;
+};
+
 // Multithreaded filter to run some rough tests on all the contours to narrow
 // down on the good ones.
 class ContourFilter {
@@ -51,20 +62,10 @@ class ContourFilter {
   cv::Mat &original_frame_;
   std::vector<std::vector<cv::Point>> &shapes_;
   std::vector<std::vector<cv::Point>> &good_shapes_;
+  std::vector<ShapeTemplate> templates_;
+
   size_t start_index_, end_index_;
   std::mutex &good_shapes_mutex_;
-};
-
-class ShapeTemplate {
- public:
-  ShapeTemplate(std::string filename, double similarity_thres);
-  double FindSimilarity(std::vector<cv::Point> contour);
-  std::string name();
-
- private:
-  std::vector<cv::Point> template_contour_;
-  std::string name_;
-  double similarity_thres_;
 };
 
 class ShapeDetector {

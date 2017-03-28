@@ -29,6 +29,10 @@ boost_library(
 )
 
 boost_library(
+  name = "array",
+)
+
+boost_library(
   name = "assert",
 )
 
@@ -187,6 +191,15 @@ boost_library(
 )
 
 boost_library(
+  name = "lexical_cast",
+  deps = [
+    ":container",
+    ":math",
+    ":numeric_conversion",
+  ],
+)
+
+boost_library(
   name = "math",
 )
 
@@ -214,6 +227,10 @@ boost_library(
     ":static_assert",
     ":tuple",
   ],
+)
+
+boost_library(
+  name = "numeric_conversion",
 )
 
 boost_library(
@@ -324,21 +341,57 @@ boost_library(
 )
 
 boost_library(
+  name = "test",
+  srcs = glob([
+    boost_path + "/test/src/**/*.cpp",
+  ]),
+  deps = [
+    ":assert",
+    ":algorithm",
+    ":detail",
+    ":config",
+    ":exception",
+    ":function",
+    ":integer",
+    ":io",
+    ":iterator",
+    ":numeric_conversion",
+    ":smart_ptr",
+    ":timer",
+    ":type_traits",
+    ":utility",
+  ],
+)
+
+boost_library(
+  name = "timer",
+)
+
+boost_library(
   name = "thread",
   defines = [
     "BOOST_NO_CXX11_RVALUE_REFERENCES",
     "BOOST_NO_CXX11_SMART_PTR",
   ],
+  srcs = glob([
+    boost_path + "/thread/src/pthread/*.cpp",
+  ]),
   deps = [
     ":atomic",
+    ":algorithm",
+    ":array",
     ":chrono",
     ":bind",
     ":core",
     ":date_time",
+    ":detail",
     ":exception",
     ":function",
     ":functional",
     ":io",
+    ":iterator",
+    ":lexical_cast",
+    ":optional",
     ":system",
     ":type_traits",
     ":tuple",

@@ -37,3 +37,14 @@ cc_binary(
     ':output_to_file_lib',
   ],
 )
+
+cc_binary(
+  name = 'camera_reader',
+  visibility = ['//visibility:public'],
+  srcs = ['camera_reader.cc',],
+
+  deps = [
+    '//third_party/sony_remote_camera:sony_remote_camera_lib',
+    '//third_party/boost:test',
+  ],
+)

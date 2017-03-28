@@ -1,7 +1,7 @@
 licenses(['notice'])
 
 cc_library(
-  name = 'sony_remote_camera',
+  name = 'sony_remote_camera_lib',
   visibility = ['//visibility:public'],
   srcs = glob(['**/*.cpp']),
   hdrs = glob([
