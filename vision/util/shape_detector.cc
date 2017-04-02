@@ -38,12 +38,15 @@ ContourFilter::ContourFilter(cv::Mat &original_frame,
       start_index_(start_index),
       end_index_(end_index),
       good_shapes_mutex_(good_shapes_mutex) {
+
+  templates_.push_back(ShapeTemplate("./shapes/circle.png"));
+  templates_.push_back(ShapeTemplate("./shapes/cross.png"));
   templates_.push_back(ShapeTemplate("./shapes/diamond.png"));
+  templates_.push_back(ShapeTemplate("./shapes/heptagon.png"));
   templates_.push_back(ShapeTemplate("./shapes/hexagon.jpg"));
-  templates_.push_back(ShapeTemplate("./shapes/plus.jpg"));
-  templates_.push_back(ShapeTemplate("./shapes/semicircle.png"));
-  templates_.push_back(ShapeTemplate("./shapes/star.jpg"));
-  templates_.push_back(ShapeTemplate("./shapes/triangle.jpg"));
+  templates_.push_back(ShapeTemplate("./shapes/octagon.png"));
+  templates_.push_back(ShapeTemplate("./shapes/pentagon.png"));
+  templates_.push_back(ShapeTemplate("./shapes/quarter_circle.png"));
 }
 
 void ContourFilter::operator()() {
@@ -55,7 +58,8 @@ void ContourFilter::operator()() {
     bool remove = false;
 
     double area = cv::contourArea(shapes_.at(i));
-    if (area < 100) remove = true;
+    if (area < 25) remove = true;
+    if (area > 10000) remove = true;
 
     for (int i = 0; !remove && i < 3; i++) {
       FindHistPeaks(hist[2], peaks[i]);
@@ -63,30 +67,27 @@ void ContourFilter::operator()() {
         remove = true;
       }
     }
-
+/*
     if (!remove) {
       cv::Mat mask =
           cv::Mat::zeros(original_frame_.rows, original_frame_.cols, CV_8UC1);
-      cv::drawContours(mask, std::vector<std::vector<cv::Point>>(1, shapes_.at(i)), -1,
-                       cv::Scalar(255), CV_FILLED);
+      cv::drawContours(mask,
+                       std::vector<std::vector<cv::Point>>(1, shapes_.at(i)),
+                       -1, cv::Scalar(255), CV_FILLED);
 
 #ifdef DESKTOP_ENVIRONMENT
-      cv::namedWindow(std::to_string(i), 1);
-      cv::imshow(std::to_string(i), mask);
+cv::namedWindow(std::to_string(i), 1);
+cv::imshow(std::to_string(i), mask);
 #endif
 
-
-      Timer timer;
-
-      std::cout << i << " ------------------\n";
       for (size_t j = 0; j < templates_.size(); j++) {
-        std::cout << templates_.at(j).name() << ": "
+        std::cout << std::setw(10) << templates_.at(j).name() << ": "
+                  << std::setw(9)
                   << templates_.at(j).FindSimilarity(shapes_.at(i)) << " ";
       }
       std::cout << std::endl;
-
-      timer.tick();
     }
+*/
 
     if (!remove) {
       std::lock_guard<std::mutex> guard(good_shapes_mutex_);
@@ -107,7 +108,6 @@ void ContourFilter::ContourHistogram(cv::Mat &original_frame,
 
   cv::Mat crop_cut = original_frame(bounding_rect);
   cv::Mat mask_cut = mask(bounding_rect);
-
 
   // Split up color channels.
   std::vector<cv::Mat> bgr_planes;
@@ -238,15 +238,13 @@ void ShapeDetector::GenerateContours(
 
 void ShapeDetector::FilterContours(
     cv::Mat &original_frame, std::vector<std::vector<cv::Point>> &shapes) {
-  Timer timer;
-  std::cout << "START FILTER\n";
   std::vector<std::vector<cv::Point>> good_shapes;
   std::mutex good_shapes_mutex;
 
   std::vector<ContourFilter> contour_filters;
   std::vector<std::thread> contour_filter_threads;
 
-  const int kNumFilterThreads = 64;
+  const int kNumFilterThreads = 4;
   for (int i = 0; i < kNumFilterThreads; i++) {
     size_t start_index =
         static_cast<double>(shapes.size()) / kNumFilterThreads * i;
@@ -264,8 +262,6 @@ void ShapeDetector::FilterContours(
   }
 
   shapes = std::move(good_shapes);
-  std::cout << "END FILTER\n";
-  timer.tick();
 }
 
 // Trace out contours on the given image.
@@ -284,13 +280,18 @@ void ShapeDetector::OutlineContours(
       cv::line(frame, from, to, color, 1);
     }
 
+    cv::Rect bounding_rect = cv::boundingRect(contours.at(i));
+    cv::Scalar color_rect(255, 0, 0);
+    cv::rectangle(frame, bounding_rect.tl(), bounding_rect.br(), color_rect, 1, 8, 0);
+
     cv::namedWindow("Output");
     cv::imshow("Output", frame);
     cv::moveWindow("Output", 0, 25);
 #endif
-
+/*
     std::cout << "Contour #" << std::setw(5) << i << " area: " << std::setw(15)
               << cv::contourArea(contours[i]) << std::endl;
+*/
 
 #ifdef DESKTOP_ENVIRONMENT
 //    cv::waitKey(100);
@@ -320,12 +321,12 @@ ShapeTemplate::ShapeTemplate(std::string filename) {
   cv::Scalar color(255, 0, 0);
 
   drawContours(dst, contours, 0, color, CV_FILLED, 8, hierarchy);
-/*
-#ifdef DESKTOP_ENVIRONMENT
-  cv::namedWindow(filename, 1);
-  cv::imshow(filename, dst);
-#endif
-*/
+  #ifdef DESKTOP_ENVIRONMENT
+    cv::namedWindow(filename, 1);
+    cv::imshow(filename, dst);
+  #endif
+
+  std::cout << "NEW SHAPE: " << filename << std::endl;
 }
 
 double ShapeTemplate::FindSimilarity(std::vector<cv::Point> contour) {
