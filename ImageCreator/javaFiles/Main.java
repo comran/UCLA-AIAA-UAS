@@ -18,363 +18,431 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-public class Main extends JFrame {
-	
-	public void paint(Graphics g) {
-		g.setColor(Color.GREEN);
+public
+class Main extends JFrame {
+ public
+  void paint(Graphics g) {
+    g.setColor(Color.GREEN);
 
-		g.fillOval(240, 240, 200, 100);
-	}
+    g.fillOval(240, 240, 200, 100);
+  }
 
-	public static BufferedImage bufferRandTerrain(String filePath, String fileIndic, String fileType, int sampleCount) {
-		BufferedImage img = null;
+ public
+  static BufferedImage bufferRandTerrain(String filePath, String fileIndic,
+                                         String fileType, int sampleCount) {
+    BufferedImage img = null;
 
-		Random rand = new Random();
-		int n = rand.nextInt(sampleCount);
+    Random rand = new Random();
+    int n = rand.nextInt(sampleCount);
 
-		try {
-			img = ImageIO.read(new File(filePath + fileIndic + n + fileType));
-		} catch (IOException e) {
-			System.out.println("didn't buffer" + n);
-		}
-		return img;
-	}
+    try {
+      img = ImageIO.read(new File(filePath + fileIndic + n + fileType));
+    } catch (IOException e) {
+      System.out.println("didn't buffer" + n);
+    }
 
-	public static BufferedImage printShape(BufferedImage buffer, String shapeFilePath, String shapeFileIndic,
-			String fileType, int shapeId, int charCount, String characterFilePath, String charFileIndic) {
+    return img;
+  }
 
-		final int MAXSCALE = 1;
-		// buffers shape
-		Random rand = new Random();
-		Graphics2D g2d = buffer.createGraphics();
-		BufferedImage shape = null;
-		try {
-			shape = ImageIO.read(new File(shapeFilePath + shapeFileIndic + shapeId + fileType));
-		} catch (IOException e) {
-			System.out.println("catch this");
-		}
-		//adjusts color of shape
-		int redIncrement = -rand.nextInt(255);
-		int greenIncrement = -rand.nextInt(255);
-		int blueIncrement = -rand.nextInt(255);
+ public
+  static BufferedImage printShape(BufferedImage buffer, String shapeFilePath,
+                                  String shapeFileIndic, String fileType,
+                                  int shapeId, int charCount,
+                                  String characterFilePath,
+                                  String charFileIndic) {
+    final int MAXSCALE = 1;
+    // buffers shape
+    Random rand = new Random();
+    Graphics2D g2d = buffer.createGraphics();
+    BufferedImage shape = null;
+    try {
+      shape = ImageIO.read(
+          new File(shapeFilePath + shapeFileIndic + shapeId + fileType));
+    } catch (IOException e) {
+      System.out.println("catch this");
+    }
+    // adjusts color of shape
+    int redIncrement = -rand.nextInt(255);
+    int greenIncrement = -rand.nextInt(255);
+    int blueIncrement = -rand.nextInt(255);
 
-		ImageFilter shapeFilter = new RGBImageFilter() {
-			@Override
-			public int filterRGB(int x, int y, int rgb) {
-				int alpha = (rgb & 0xff000000);
-				int red = (rgb & 0xff0000) >> 16;
-				int green = (rgb & 0x00ff00) >> 8;
-				int blue = (rgb & 0x0000ff);
+    ImageFilter shapeFilter = new RGBImageFilter() {
+      @Override public int filterRGB(int x, int y, int rgb) {
+        int alpha = (rgb & 0xff000000);
+        int red = (rgb & 0xff0000) >> 16;
+        int green = (rgb & 0x00ff00) >> 8;
+        int blue = (rgb & 0x0000ff);
 
-				red = Math.max(0, Math.min(0xff, red + redIncrement));
-				green = Math.max(0, Math.min(0xff, green + greenIncrement));
-				blue = Math.max(0, Math.min(0xff, blue + blueIncrement));
+        red = Math.max(0, Math.min(0xff, red + redIncrement));
+        green = Math.max(0, Math.min(0xff, green + greenIncrement));
+        blue = Math.max(0, Math.min(0xff, blue + blueIncrement));
 
-				return alpha | (red << 16) | (green << 8) | blue;
-			}
-		};
+        return alpha | (red << 16) | (green << 8) | blue;
+      }
+    };
 
-		Image filteredImage = Toolkit.getDefaultToolkit()
-				.createImage(new FilteredImageSource(shape.getSource(), shapeFilter));
-		
-		//rotates shape
-		double rotateAngle = (rand.nextDouble() + rand.nextInt(7)) % 6.28;
-		
-		//prepares scale with random elements
-		BufferedImage shapeRot = rotate(toBufferedImage(filteredImage), rotateAngle);
-		double randScale = 0;
-		while (randScale < 0.3) {
-			randScale = rand.nextInt(MAXSCALE) + rand.nextDouble();
-		}
-		double minBuild = 0;
-		while (minBuild < 0.4) {
-			minBuild = rand.nextInt(MAXSCALE) + rand.nextDouble();
-		}
-		int xpos = -1000;
-		int ypos = -1000;
+    Image filteredImage = Toolkit.getDefaultToolkit().createImage(
+        new FilteredImageSource(shape.getSource(), shapeFilter));
 
-		while (xpos > (buffer.getWidth() - shapeRot.getWidth()) || xpos < 0) {
-			xpos = rand.nextInt(buffer.getWidth()) - rand.nextInt(shapeRot.getWidth());
-		}
+    // rotates shape
+    double rotateAngle = (rand.nextDouble() + rand.nextInt(7)) % 6.28;
 
-		while (ypos > (buffer.getHeight() - shapeRot.getHeight()) || ypos < 0) {
-			ypos = rand.nextInt(buffer.getHeight()) - rand.nextInt(shapeRot.getHeight());
-		}
+    // prepares scale with random elements
+    BufferedImage shapeRot =
+        rotate(toBufferedImage(filteredImage), rotateAngle);
+    double randScale = 0;
+    while (randScale < 0.3) {
+      randScale = rand.nextInt(MAXSCALE) + rand.nextDouble();
+    }
+    double minBuild = 0;
+    while (minBuild < 0.4) {
+      minBuild = rand.nextInt(MAXSCALE) + rand.nextDouble();
+    }
+    int xpos = -1000;
+    int ypos = -1000;
 
-		double widthExtraScale = 0;
-		double heightExtraScale = 0;
+    double widthExtraScale = 0;
+    double heightExtraScale = 0;
 
-		while (widthExtraScale > 0 && widthExtraScale < 0.3) {
-			widthExtraScale = rand.nextDouble();
-		}
+    while (widthExtraScale > 0 && widthExtraScale < 0.3) {
+      widthExtraScale = rand.nextDouble();
+      System.out.println("LOOP A");
+    }
 
-		while (heightExtraScale > 0 && heightExtraScale < 0.3) {
-			heightExtraScale = rand.nextDouble();
-		}
+    while (heightExtraScale > 0 && heightExtraScale < 0.3) {
+      heightExtraScale = rand.nextDouble();
+      System.out.println("LOOP B");
+    }
 
-		
-		g2d.setFont(new Font("TimesRoman", Font.PLAIN, 50));
-		int widthScale = (int) (shapeRot.getWidth() * (randScale) * (widthExtraScale + minBuild));
-		int heightScale = (int) (shapeRot.getHeight() * (randScale) * (heightExtraScale + minBuild));
-		
-		g2d.drawImage(shapeRot, xpos, ypos, widthScale,	heightScale, null);
+    g2d.setFont(new Font("Arial", Font.PLAIN, 50));
+    int widthScale =
+        (int)(shapeRot.getWidth() * (randScale) * (widthExtraScale + minBuild));
+    int heightScale = (int)(shapeRot.getHeight() * (randScale) *
+                            (heightExtraScale + minBuild));
 
-		// creates random character
-		int charNum = rand.nextInt(charCount);
-		
-		BufferedImage character = null;
-		try {
-			character = ImageIO.read(new File(characterFilePath + charFileIndic + charNum + fileType));
-		} catch (IOException e) {
-			System.out.println("catch this");
-		}
-		
-		//adjusts color of random character
-		int charRedIncrement = -rand.nextInt(255);
-		int charGreenIncrement = -rand.nextInt(255);
-		int charBlueIncrement = -rand.nextInt(255);
+    while (xpos > (buffer.getWidth() - widthScale) || xpos < 0) {
+      xpos =
+          rand.nextInt(buffer.getWidth());
+      System.out.println("LOOP C");
+    }
 
-		ImageFilter charFilter = new RGBImageFilter() {
-			@Override
-			public int filterRGB(int x, int y, int rgb) {
-				int alpha = (rgb & 0xff000000);
-				int red = (rgb & 0xff0000) >> 16;
-				int green = (rgb & 0x00ff00) >> 8;
-				int blue = (rgb & 0x0000ff);
+    while (ypos > (buffer.getHeight() - heightScale) || ypos < 0) {
+      ypos =
+          rand.nextInt(buffer.getHeight());
+      System.out.println("LOOP D");
+    }
 
-				red = Math.max(0, Math.min(0xff, red + charRedIncrement));
-				green = Math.max(0, Math.min(0xff, green + charGreenIncrement));
-				blue = Math.max(0, Math.min(0xff, blue + charBlueIncrement));
+    g2d.drawImage(shapeRot, xpos, ypos, widthScale, heightScale, null);
 
-				return alpha | (red << 16) | (green << 8) | blue;
-			}
-		};
-		
-		Image charFilteredImage = Toolkit.getDefaultToolkit()
-				.createImage(new FilteredImageSource(character.getSource(), charFilter));
-		
-		//prints character
-		g2d.drawImage(rotate(toBufferedImage(charFilteredImage), rotateAngle), xpos + (int)(widthScale/3.3), ypos+(int)(heightScale/3.3), widthScale/3, heightScale/3, null);
-		
-		return buffer;
-		
-	}
-	
-	public static BufferedImage printChar(BufferedImage buffer, String shapeFilePath, String shapeFileIndic,
-			String fileType, int charId, int shapeCount, String characterFilePath, String charFileIndic) {
-		// buffer.getHeight();
-		// buffer.getWidth();
+    // creates random character
+    int charNum = rand.nextInt(charCount);
 
-		final int MAXSCALE = 1;
-		// buffers shape
-		Random rand = new Random();
-		Graphics2D g2d = buffer.createGraphics();
-		BufferedImage shape = null;
-		int shapeNum = rand.nextInt(shapeCount-1);
-		try {
-			shape = ImageIO.read(new File(shapeFilePath + shapeFileIndic + shapeNum + fileType));
-		} catch (IOException e) {
-			System.out.println("catch this");
-		}
+    BufferedImage character = null;
+    try {
+      character = ImageIO.read(
+          new File(characterFilePath + charFileIndic + charNum + fileType));
+    } catch (IOException e) {
+      System.out.println("catch this");
+    }
 
-		//adjusts color of shape
-		int redIncrement = -rand.nextInt(255);
-		int greenIncrement = -rand.nextInt(255);
-		int blueIncrement = -rand.nextInt(255);
+    // adjusts color of random character
+    int charRedIncrement = -rand.nextInt(255);
+    int charGreenIncrement = -rand.nextInt(255);
+    int charBlueIncrement = -rand.nextInt(255);
 
-		ImageFilter shapeFilter = new RGBImageFilter() {
-			@Override
-			public int filterRGB(int x, int y, int rgb) {
-				int alpha = (rgb & 0xff000000);
-				int red = (rgb & 0xff0000) >> 16;
-				int green = (rgb & 0x00ff00) >> 8;
-				int blue = (rgb & 0x0000ff);
+    ImageFilter charFilter = new RGBImageFilter() {
+      @Override public int filterRGB(int x, int y, int rgb) {
+        int alpha = (rgb & 0xff000000);
+        int red = (rgb & 0xff0000) >> 16;
+        int green = (rgb & 0x00ff00) >> 8;
+        int blue = (rgb & 0x0000ff);
 
-				red = Math.max(0, Math.min(0xff, red + redIncrement));
-				green = Math.max(0, Math.min(0xff, green + greenIncrement));
-				blue = Math.max(0, Math.min(0xff, blue + blueIncrement));
+        red = Math.max(0, Math.min(0xff, red + charRedIncrement));
+        green = Math.max(0, Math.min(0xff, green + charGreenIncrement));
+        blue = Math.max(0, Math.min(0xff, blue + charBlueIncrement));
 
-				return alpha | (red << 16) | (green << 8) | blue;
-			}
-		};
+        return alpha | (red << 16) | (green << 8) | blue;
+      }
+    };
 
-		Image filteredImage = Toolkit.getDefaultToolkit()
-				.createImage(new FilteredImageSource(shape.getSource(), shapeFilter));
-		
-		//rotates shape
-		double rotateAngle = (rand.nextDouble() + rand.nextInt(7)) % 6.28;
-		
-		BufferedImage shapeRot = rotate(toBufferedImage(filteredImage), rotateAngle);
-		
-		//generates random scaling
-		double randScale = 0;
-		while (randScale < 0.3) {
-			randScale = rand.nextInt(MAXSCALE) + rand.nextDouble();
-		}
-		double minBuild = 0;
-		while (minBuild < 0.4) {
-			minBuild = rand.nextInt(MAXSCALE) + rand.nextDouble();
-		}
-		int xpos = -1000;
-		int ypos = -1000;
+    Image charFilteredImage = Toolkit.getDefaultToolkit().createImage(
+        new FilteredImageSource(character.getSource(), charFilter));
 
-		while (xpos > (buffer.getWidth() - shapeRot.getWidth()) || xpos < 0) {
-			xpos = rand.nextInt(buffer.getWidth()) - rand.nextInt(shapeRot.getWidth());
-		}
+    // prints character
+    g2d.drawImage(rotate(toBufferedImage(charFilteredImage), rotateAngle),
+                  xpos + (int)(widthScale / 3.3),
+                  ypos + (int)(heightScale / 3.3) + 5, widthScale / 3,
+                  heightScale / 3, null);
 
-		while (ypos > (buffer.getHeight() - shapeRot.getHeight()) || ypos < 0) {
-			ypos = rand.nextInt(buffer.getHeight()) - rand.nextInt(shapeRot.getHeight());
-		}
+    int offset = rand.nextInt(10);
+    int startx = Math.max(0, xpos - offset);
+    int starty = Math.max(0, ypos - offset);
+    int endx = Math.min(buffer.getWidth(), xpos + widthScale + offset);
+    int endy = Math.min(buffer.getHeight(), ypos + heightScale + offset);
+    buffer = buffer.getSubimage(startx, starty, endx - startx, endy - starty);
 
-		double widthExtraScale = 0;
-		double heightExtraScale = 0;
+    return buffer;
+  }
 
-		while (widthExtraScale > 0 && widthExtraScale < 0.3) {
-			widthExtraScale = rand.nextDouble();
-		}
+ public
+  static BufferedImage printChar(BufferedImage buffer, String shapeFilePath,
+                                 String shapeFileIndic, String fileType,
+                                 int charId, int shapeCount,
+                                 String characterFilePath,
+                                 String charFileIndic) {
+    // buffer.getHeight();
+    // buffer.getWidth();
 
-		while (heightExtraScale > 0 && heightExtraScale < 0.3) {
-			heightExtraScale = rand.nextDouble();
-		}
+    final int MAXSCALE = 1;
+    // buffers shape
+    Random rand = new Random();
+    Graphics2D g2d = buffer.createGraphics();
+    BufferedImage shape = null;
+    int shapeNum = rand.nextInt(shapeCount - 1);
+    try {
+      shape = ImageIO.read(
+          new File(shapeFilePath + shapeFileIndic + shapeNum + fileType));
+    } catch (IOException e) {
+      System.out.println("catch this");
+    }
 
-		int widthScale = (int) (shapeRot.getWidth() * (randScale) * (widthExtraScale + minBuild));
-		int heightScale = (int) (shapeRot.getHeight() * (randScale) * (heightExtraScale + minBuild));
-		
-		g2d.drawImage(shapeRot, xpos, ypos, widthScale,	heightScale, null);
+    // adjusts color of shape
+    int redIncrement = -rand.nextInt(255);
+    int greenIncrement = -rand.nextInt(255);
+    int blueIncrement = -rand.nextInt(255);
 
+    ImageFilter shapeFilter = new RGBImageFilter() {
+      @Override public int filterRGB(int x, int y, int rgb) {
+        int alpha = (rgb & 0xff000000);
+        int red = (rgb & 0xff0000) >> 16;
+        int green = (rgb & 0x00ff00) >> 8;
+        int blue = (rgb & 0x0000ff);
 
-		BufferedImage character = null;
-		try {
-			character = ImageIO.read(new File(characterFilePath + charFileIndic + charId + fileType));
-		} catch (IOException e) {
-			System.out.println("catch this");
-		}
-		
-		//changes color for character
-		int charRedIncrement = -rand.nextInt(255);
-		int charGreenIncrement = -rand.nextInt(255);
-		int charBlueIncrement = -rand.nextInt(255);
+        red = Math.max(0, Math.min(0xff, red + redIncrement));
+        green = Math.max(0, Math.min(0xff, green + greenIncrement));
+        blue = Math.max(0, Math.min(0xff, blue + blueIncrement));
 
-		ImageFilter charFilter = new RGBImageFilter() {
-			@Override
-			public int filterRGB(int x, int y, int rgb) {
-				int alpha = (rgb & 0xff000000);
-				int red = (rgb & 0xff0000) >> 16;
-				int green = (rgb & 0x00ff00) >> 8;
-				int blue = (rgb & 0x0000ff);
+        return alpha | (red << 16) | (green << 8) | blue;
+      }
+    };
 
-				red = Math.max(0, Math.min(0xff, red + charRedIncrement));
-				green = Math.max(0, Math.min(0xff, green + charGreenIncrement));
-				blue = Math.max(0, Math.min(0xff, blue + charBlueIncrement));
+    Image filteredImage = Toolkit.getDefaultToolkit().createImage(
+        new FilteredImageSource(shape.getSource(), shapeFilter));
 
-				return alpha | (red << 16) | (green << 8) | blue;
-			}
-		};
-		
-		Image charFilteredImage = Toolkit.getDefaultToolkit()
-				.createImage(new FilteredImageSource(character.getSource(), charFilter));
-		
-		g2d.drawImage(rotate(toBufferedImage(charFilteredImage), rotateAngle), xpos + (int)(widthScale/3.3), ypos+(int)(heightScale/3.3), widthScale/3, heightScale/3, null);
-		
-		return buffer;
-		
-	}
+    // rotates shape
+    double rotateAngle = (rand.nextDouble() + rand.nextInt(7)) % 6.28;
 
-	public static void main(String[] args) {
-		
-		// file indicator for all images
-		String inFileIndic = "terrain";
-		String filePathTerrain = "Enter Path ---\\JavaFiles\\ImageCreator\\terrain\\";
-		String filePathShape = "Enter Path ---\\JavaFiles\\ImageCreator\\shape\\";
-		String filePathChar = "Enter Path ---\\JavaFiles\\ImageCreator\\characters\\";
+    BufferedImage shapeRot =
+        rotate(toBufferedImage(filteredImage), rotateAngle);
 
-		String fileType = ".png";
-		String shapeFileIndic = "shape";
-		String outFileIndic = "practice";
-		String charFileIndic = "let";
-		
-		boolean shape = false;
-		int shapeId= 0;
-		int charId = 0;
-		int replyShapes = JOptionPane.showConfirmDialog(null, "Are you Printing Shapes? (Yes for shapes, No for characters)", "confirm", JOptionPane.YES_NO_OPTION);
-	    if (replyShapes == JOptionPane.YES_OPTION) {
-	       	shape = true;
-			shapeId = Integer.parseInt(JOptionPane.showInputDialog("What is the shape ID of the shape you want to print?"));
-	    }else{
-	    	shape = false;
-	    	charId = Integer.parseInt(JOptionPane.showInputDialog("What is the character ID of the character you want to print?"));
-	    }
-		
-		// number of samples (including zero)
-		final int GENERATENUMBER = Integer.parseInt(JOptionPane.showInputDialog("How many pictures?"));
-		// number of Background pic's you have
-		final int TERRAINCOUNT = 1;
-		
-		
-		// how many shape pictures do you have?
-		final int SHAPECOUNT = 6;
-		
-		// how many shape pictures do you have?
-		final int CHARCOUNT = 26;
-		int reply;
-		if(shape){
-			 reply = JOptionPane.showConfirmDialog(null, "Please confirm the details: \n you want " + GENERATENUMBER + " pictures of shape" + shapeId + " with terrain from : \n "+ filePathTerrain +" \n with shapes from : \n "+ filePathShape , "confirm", JOptionPane.YES_NO_OPTION);
-		}else{
-			reply = JOptionPane.showConfirmDialog(null, "Please confirm the details: \n you want " + GENERATENUMBER + " pictures of character" + charId + " with terrain from : \n "+ filePathTerrain +" \n with characters from : \n "+ filePathChar, "confirm", JOptionPane.YES_NO_OPTION);
-		}
-		
-	    if (reply == JOptionPane.NO_OPTION) {
-	       	return;
-	    }
-	        
-		
-		if (shape) {
-			System.out.println("Printing " + GENERATENUMBER + " shape pictures with shapeID " + shapeId);
-			for (int i = 0; i < GENERATENUMBER; i++) {
-				writeToFile(printShape(bufferRandTerrain(filePathTerrain, inFileIndic, fileType, TERRAINCOUNT),
-						filePathShape, shapeFileIndic, fileType, shapeId, CHARCOUNT, filePathChar, charFileIndic), outFileIndic, i, fileType);
-			}
-		}else{
-			System.out.println("Printing " + GENERATENUMBER + " character pictures with characterID " + charId);
-			for (int i = 0; i < GENERATENUMBER; i++) {
-				writeToFile(printChar(bufferRandTerrain(filePathTerrain, inFileIndic, fileType, TERRAINCOUNT),
-						filePathShape, shapeFileIndic, fileType, charId, SHAPECOUNT, filePathChar, charFileIndic), outFileIndic, i, fileType);
-			}
-		}
-	}
+    // generates random scaling
+    double randScale = 0;
+    while (randScale < 0.3) {
+      randScale = rand.nextInt(MAXSCALE) + rand.nextDouble();
+    }
 
-	public static void writeToFile(BufferedImage o, String outFileIndic, int fileNum, String fileType) {
-		try {
-			System.out.println(outFileIndic + fileNum + fileType);
-			File outputfile = new File(outFileIndic + fileNum + fileType);
-			ImageIO.write(o, "png", outputfile);
-		} catch (IOException e) {
-		}
-	}
+    double minBuild = 0;
+    while (minBuild < 0.4) {
+      minBuild = rand.nextInt(MAXSCALE) + rand.nextDouble();
+    }
 
-	public static BufferedImage rotate(BufferedImage img, double angle) {
-		AffineTransform tx = new AffineTransform();
-		tx.rotate(angle, img.getWidth() / 2, img.getHeight() / 2);
+    int xpos = -1000;
+    int ypos = -1000;
 
-		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
-		img = op.filter(img, null);
-		return img;
-	}
+    while (xpos > (buffer.getWidth() - shapeRot.getWidth()) || xpos < 0) {
+      xpos =
+          rand.nextInt(buffer.getWidth()) - rand.nextInt(shapeRot.getWidth());
+    }
 
-	public static BufferedImage toBufferedImage(Image img) {
-		if (img instanceof BufferedImage) {
-			return (BufferedImage) img;
-		}
+    while (ypos > (buffer.getHeight() - shapeRot.getHeight()) || ypos < 0) {
+      ypos =
+          rand.nextInt(buffer.getHeight()) - rand.nextInt(shapeRot.getHeight());
+    }
 
-		// Create a buffered image with transparency
-		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+    double widthExtraScale = 0;
+    double heightExtraScale = 0;
 
-		// Draw the image on to the buffered image
-		Graphics2D bGr = bimage.createGraphics();
-		bGr.drawImage(img, 0, 0, null);
-		bGr.dispose();
+    while (widthExtraScale > 0 && widthExtraScale < 0.3) {
+      widthExtraScale = rand.nextDouble();
+    }
 
-		// Return the buffered image
-		return bimage;
-	}
+    while (heightExtraScale > 0 && heightExtraScale < 0.3) {
+      heightExtraScale = rand.nextDouble();
+    }
+
+    int widthScale =
+        (int)(shapeRot.getWidth() * (randScale) * (widthExtraScale + minBuild));
+    int heightScale = (int)(shapeRot.getHeight() * (randScale) *
+                            (heightExtraScale + minBuild));
+
+    g2d.drawImage(shapeRot, xpos, ypos, widthScale, heightScale, null);
+
+    BufferedImage character = null;
+    try {
+      character = ImageIO.read(
+          new File(characterFilePath + charFileIndic + charId + fileType));
+    } catch (IOException e) {
+      System.out.println("catch this");
+    }
+
+    // changes color for character
+    int charRedIncrement = -rand.nextInt(255);
+    int charGreenIncrement = -rand.nextInt(255);
+    int charBlueIncrement = -rand.nextInt(255);
+
+    ImageFilter charFilter = new RGBImageFilter() {
+      @Override public int filterRGB(int x, int y, int rgb) {
+        int alpha = (rgb & 0xff000000);
+        int red = (rgb & 0xff0000) >> 16;
+        int green = (rgb & 0x00ff00) >> 8;
+        int blue = (rgb & 0x0000ff);
+
+        red = Math.max(0, Math.min(0xff, red + charRedIncrement));
+        green = Math.max(0, Math.min(0xff, green + charGreenIncrement));
+        blue = Math.max(0, Math.min(0xff, blue + charBlueIncrement));
+
+        return alpha | (red << 16) | (green << 8) | blue;
+      }
+    };
+
+    Image charFilteredImage = Toolkit.getDefaultToolkit().createImage(
+        new FilteredImageSource(character.getSource(), charFilter));
+
+    g2d.drawImage(rotate(toBufferedImage(charFilteredImage), rotateAngle),
+                  xpos + (int)(widthScale / 3.3),
+                  ypos + (int)(heightScale / 3.3), widthScale / 3,
+                  heightScale / 3, null);
+
+    return buffer;
+  }
+
+ public
+  static void main(String[] args) {
+    // file indicator for all images
+    String inFileIndic = "terrain";
+    String filePathTerrain = "../terrain/";
+    String filePathShape = "../shape/";
+    String filePathChar = "../characters/";
+
+    String fileType = ".png";
+    String shapeFileIndic = "shape";
+    String outFileIndic = "practice";
+    int randNameString = (new Random()).nextInt((int)1e7);
+    outFileIndic += randNameString;
+    System.out.println("Outputting with ID: " + randNameString);
+    outFileIndic += "-";
+    String charFileIndic = "let";
+
+    boolean shape = false;
+    int shapeId = 0;
+    int charId = 0;
+    int replyShapes = JOptionPane.showConfirmDialog(
+        null, "Are you Printing Shapes? (Yes for shapes, No for characters)",
+        "confirm", JOptionPane.YES_NO_OPTION);
+    if (replyShapes == JOptionPane.YES_OPTION) {
+      shape = true;
+      shapeId = Integer.parseInt(JOptionPane.showInputDialog(
+          "What is the shape ID of the shape you want to print?"));
+    } else {
+      shape = false;
+      charId = Integer.parseInt(JOptionPane.showInputDialog(
+          "What is the character ID of the character you want to print?"));
+    }
+
+    // number of samples (including zero)
+    final int GENERATENUMBER =
+        Integer.parseInt(JOptionPane.showInputDialog("How many pictures?"));
+    // number of Background pic's you have
+    final int TERRAINCOUNT = 3;
+
+    // how many shape pictures do you have?
+    final int SHAPECOUNT = 6;
+
+    // how many shape pictures do you have?
+    final int CHARCOUNT = 26;
+    int reply;
+    if (shape) {
+      reply = JOptionPane.showConfirmDialog(
+          null,
+          "Please confirm the details: \n you want " + GENERATENUMBER +
+              " pictures of shape" + shapeId + " with terrain from : \n " +
+              filePathTerrain + " \n with shapes from : \n " + filePathShape,
+          "confirm", JOptionPane.YES_NO_OPTION);
+    } else {
+      reply = JOptionPane.showConfirmDialog(
+          null,
+          "Please confirm the details: \n you want " + GENERATENUMBER +
+              " pictures of character" + charId + " with terrain from : \n " +
+              filePathTerrain + " \n with characters from : \n " + filePathChar,
+          "confirm", JOptionPane.YES_NO_OPTION);
+    }
+
+    if (reply == JOptionPane.NO_OPTION) {
+      return;
+    }
+
+    if (shape) {
+      System.out.println("Printing " + GENERATENUMBER +
+                         " shape pictures with shapeID " + shapeId);
+      for (int i = 0; i < GENERATENUMBER; i++) {
+        writeToFile(printShape(bufferRandTerrain(filePathTerrain, inFileIndic,
+                                                 fileType, TERRAINCOUNT),
+                               filePathShape, shapeFileIndic, fileType, shapeId,
+                               CHARCOUNT, filePathChar, charFileIndic),
+                    outFileIndic, i, fileType);
+      }
+
+    } else {
+      System.out.println("Printing " + GENERATENUMBER +
+                         " character pictures with characterID " + charId);
+      for (int i = 0; i < GENERATENUMBER; i++) {
+        writeToFile(printChar(bufferRandTerrain(filePathTerrain, inFileIndic,
+                                                fileType, TERRAINCOUNT),
+                              filePathShape, shapeFileIndic, fileType, charId,
+                              SHAPECOUNT, filePathChar, charFileIndic),
+                    outFileIndic, i, fileType);
+      }
+    }
+  }
+
+ public
+  static void writeToFile(BufferedImage o, String outFileIndic, int fileNum,
+                          String fileType) {
+    try {
+      System.out.println(outFileIndic + fileNum + fileType);
+      File outputfile = new File(outFileIndic + fileNum + fileType);
+      ImageIO.write(o, "png", outputfile);
+    } catch (IOException e) {
+    }
+  }
+
+ public
+  static BufferedImage rotate(BufferedImage img, double angle) {
+    AffineTransform tx = new AffineTransform();
+    tx.rotate(angle, img.getWidth() / 2, img.getHeight() / 2);
+
+    AffineTransformOp op =
+        new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+    img = op.filter(img, null);
+    return img;
+  }
+
+ public
+  static BufferedImage toBufferedImage(Image img) {
+    if (img instanceof BufferedImage) {
+      return (BufferedImage)img;
+    }
+
+    // Create a buffered image with transparency
+    BufferedImage bimage = new BufferedImage(
+        img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+    // Draw the image on to the buffered image
+    Graphics2D bGr = bimage.createGraphics();
+    bGr.drawImage(img, 0, 0, null);
+    bGr.dispose();
+
+    // Return the buffered image
+    return bimage;
+  }
 }

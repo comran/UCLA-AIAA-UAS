@@ -48,3 +48,24 @@ cc_binary(
     '//third_party/boost:test',
   ],
 )
+
+cc_library(
+  name = 'image_stream_lib',
+  hdrs = ['image_stream.h',],
+
+  deps = [
+    '//vision/util:shape_detector_lib',
+  ],
+)
+
+cc_binary(
+  name = 'image_stream',
+  visibility = ['//visibility:public'],
+  srcs = ['image_stream.cc',],
+
+  deps = [
+    ':image_stream_lib',
+  ],
+)
+
+

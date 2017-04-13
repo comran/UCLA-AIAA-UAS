@@ -38,15 +38,6 @@ ContourFilter::ContourFilter(cv::Mat &original_frame,
       start_index_(start_index),
       end_index_(end_index),
       good_shapes_mutex_(good_shapes_mutex) {
-
-  templates_.push_back(ShapeTemplate("./shapes/circle.png"));
-  templates_.push_back(ShapeTemplate("./shapes/cross.png"));
-  templates_.push_back(ShapeTemplate("./shapes/diamond.png"));
-  templates_.push_back(ShapeTemplate("./shapes/heptagon.png"));
-  templates_.push_back(ShapeTemplate("./shapes/hexagon.jpg"));
-  templates_.push_back(ShapeTemplate("./shapes/octagon.png"));
-  templates_.push_back(ShapeTemplate("./shapes/pentagon.png"));
-  templates_.push_back(ShapeTemplate("./shapes/quarter_circle.png"));
 }
 
 void ContourFilter::operator()() {
@@ -67,27 +58,6 @@ void ContourFilter::operator()() {
         remove = true;
       }
     }
-/*
-    if (!remove) {
-      cv::Mat mask =
-          cv::Mat::zeros(original_frame_.rows, original_frame_.cols, CV_8UC1);
-      cv::drawContours(mask,
-                       std::vector<std::vector<cv::Point>>(1, shapes_.at(i)),
-                       -1, cv::Scalar(255), CV_FILLED);
-
-#ifdef DESKTOP_ENVIRONMENT
-cv::namedWindow(std::to_string(i), 1);
-cv::imshow(std::to_string(i), mask);
-#endif
-
-      for (size_t j = 0; j < templates_.size(); j++) {
-        std::cout << std::setw(10) << templates_.at(j).name() << ": "
-                  << std::setw(9)
-                  << templates_.at(j).FindSimilarity(shapes_.at(i)) << " ";
-      }
-      std::cout << std::endl;
-    }
-*/
 
     if (!remove) {
       std::lock_guard<std::mutex> guard(good_shapes_mutex_);
@@ -190,7 +160,7 @@ void ShapeDetector::ProcessImage(cv::Mat &frame,
   Threshold(frame, filtered_frames);
   GenerateContours(shapes, filtered_frames);
   FilterContours(frame, shapes);
-  OutlineContours(frame, frame, shapes, cv::Scalar(0, 255, 0));
+  //OutlineContours(frame, frame, shapes, cv::Scalar(0, 255, 0));
 }
 
 // Trace out the edges in a colored image for RGB channels.
@@ -282,7 +252,8 @@ void ShapeDetector::OutlineContours(
 
     cv::Rect bounding_rect = cv::boundingRect(contours.at(i));
     cv::Scalar color_rect(255, 0, 0);
-    cv::rectangle(frame, bounding_rect.tl(), bounding_rect.br(), color_rect, 1, 8, 0);
+    cv::rectangle(frame, bounding_rect.tl(), bounding_rect.br(), color_rect, 1,
+                  8, 0);
 
     cv::namedWindow("Output");
     cv::imshow("Output", frame);
@@ -321,18 +292,10 @@ ShapeTemplate::ShapeTemplate(std::string filename) {
   cv::Scalar color(255, 0, 0);
 
   drawContours(dst, contours, 0, color, CV_FILLED, 8, hierarchy);
-  #ifdef DESKTOP_ENVIRONMENT
-    cv::namedWindow(filename, 1);
-    cv::imshow(filename, dst);
-  #endif
-
-  std::cout << "NEW SHAPE: " << filename << std::endl;
 }
 
 double ShapeTemplate::FindSimilarity(std::vector<cv::Point> contour) {
-  double similarity = cv::matchShapes(contour, template_contour_, 3, 0.0);
-
-  return similarity;
+  return cv::matchShapes(contour, template_contour_, 3, 0.0);
 }
 
 std::string ShapeTemplate::name() { return name_; }

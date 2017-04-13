@@ -19,7 +19,7 @@ namespace shape_detector {
 class Timer {
  public:
   Timer();
-  void tick();  // Print time since last tick or Timer construction.
+  void tick();   // Print time since last tick or Timer construction.
   void reset();  // Reset number printed before time since last tick.
 
  private:
@@ -45,8 +45,8 @@ class ContourFilter {
   ContourFilter(cv::Mat &original_frame,
                 std::vector<std::vector<cv::Point>> &shapes,
                 std::vector<std::vector<cv::Point>> &good_shapes,
-                std::mutex &good_shapes_mutex,
-                size_t start_index, size_t end_index);
+                std::mutex &good_shapes_mutex, size_t start_index,
+                size_t end_index);
   void operator()();
 
   void ContourHistogram(cv::Mat &original_frame,
@@ -62,7 +62,6 @@ class ContourFilter {
   cv::Mat &original_frame_;
   std::vector<std::vector<cv::Point>> &shapes_;
   std::vector<std::vector<cv::Point>> &good_shapes_;
-  std::vector<ShapeTemplate> templates_;
 
   size_t start_index_, end_index_;
   std::mutex &good_shapes_mutex_;
