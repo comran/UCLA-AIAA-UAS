@@ -1,5 +1,4 @@
 *.pyc
 /bazel-*
 /compile_commands.json
-test_flight_photos
 .*.swp
