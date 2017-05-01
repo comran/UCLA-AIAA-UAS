@@ -106,12 +106,10 @@ class Main extends JFrame {
 
     while (widthExtraScale > 0 && widthExtraScale < 0.3) {
       widthExtraScale = rand.nextDouble();
-      System.out.println("LOOP A");
     }
 
     while (heightExtraScale > 0 && heightExtraScale < 0.3) {
       heightExtraScale = rand.nextDouble();
-      System.out.println("LOOP B");
     }
 
     g2d.setFont(new Font("Arial", Font.PLAIN, 50));
@@ -190,9 +188,6 @@ class Main extends JFrame {
                                  int charId, int shapeCount,
                                  String characterFilePath,
                                  String charFileIndic) {
-    // buffer.getHeight();
-    // buffer.getWidth();
-
     final int MAXSCALE = 1;
     // buffers shape
     Random rand = new Random();

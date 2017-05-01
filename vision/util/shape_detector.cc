@@ -160,7 +160,7 @@ void ShapeDetector::ProcessImage(cv::Mat &frame,
   Threshold(frame, filtered_frames);
   GenerateContours(shapes, filtered_frames);
   FilterContours(frame, shapes);
-  //OutlineContours(frame, frame, shapes, cv::Scalar(0, 255, 0));
+  OutlineContours(frame, frame, shapes, cv::Scalar(0, 255, 0));
 }
 
 // Trace out the edges in a colored image for RGB channels.
@@ -171,8 +171,9 @@ void ShapeDetector::Threshold(cv::Mat &frame, cv::Mat *filtered_frames) {
     cv::extractChannel(frame, filtered_frames[i], 2 - i /* to convert BGR */);
 
     // Blur channel to deal with camera noise.
-    cv::GaussianBlur(filtered_frames[i], filtered_frames[i], cv::Size(3, 3), 0,
-                     0);
+    cv::blur(filtered_frames[i], filtered_frames[i], cv::Size(5, 5));
+    cv::namedWindow("filtered frame " + std::to_string(i));
+    cv::imshow("filtered frame " + std::to_string(i), filtered_frames[i]);
 
     // Dynamic canny edge filter with automatic threshold values.
     cv::Mat temp_frame;
@@ -243,12 +244,12 @@ void ShapeDetector::OutlineContours(
   (void)original_frame;
   for (size_t i = 0; i < contours.size(); i++) {
 #ifdef DESKTOP_ENVIRONMENT
-    for (size_t j = 0; j < contours.at(i).size(); j++) {
+/*    for (size_t j = 0; j < contours.at(i).size(); j++) {
       cv::Point from = contours.at(i).at(j);
       cv::Point to = contours.at(i).at((j + 1) % contours.at(i).size());
 
       cv::line(frame, from, to, color, 1);
-    }
+    }*/
 
     cv::Rect bounding_rect = cv::boundingRect(contours.at(i));
     cv::Scalar color_rect(255, 0, 0);

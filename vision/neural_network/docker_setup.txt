@@ -1,0 +1,32 @@
+https://docs.docker.com/engine/installation/linux/debian/#install-using-the-repository
+
+Install packages to allow apt to use a repo over HTTPS:
+sudo apt-get install \
+     apt-transport-https \
+     ca-certificates \
+     curl \
+     gnupg2 \
+     software-properties-common
+
+Add Docker’s official GPG key:
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+
+Add stable repo: (for armhf)
+curl -sSL https://get.docker.com > install.sh
+sudo bash ./install.sh
+
+Setup/run tensorflow docker:
+sudo docker run -it -v \
+    $HOME/tf_files:/tf_files gcr.io/tensorflow/tensorflow:latest-devel
+
+Retrain:
+python tensorflow/examples/image_retraining/retrain.py \
+ --bottleneck_dir=/tf_files/bottlenecks \
+ --how_many_training_steps 500 \
+ --model_dir=/tf_files/inception \
+ --output_graph=/tf_files/retrained_graph.pb \
+ --output_labels=/tf_files/retrained_labels.txt \
+ --image_dir /tf_files/flower_photos
+
+Test image:
+python /tf_files/label_image.py /tf_files/flower_photos/daisy/21652746_cc379e0eea_m.jpg
