@@ -30,7 +30,12 @@ void TargetSpotter::operator()() {
 int main(int argc, char** argv) {
   // Handle processing targets in an image file.
   if(argc > 1) {
-    cv::Mat frame = cv::imread(argv[1]);
+    cv::Mat orig_frame = cv::imread(argv[1]);
+    const double kScaleFactor = 1.0 / 3;
+
+    cv::Mat frame;
+    cv::resize(orig_frame, frame, cv::Size(orig_frame.cols * kScaleFactor,
+                                           orig_frame.rows * kScaleFactor));
 
     vision::shape_detector::ShapeDetector shape_detector;
 
