@@ -5,46 +5,25 @@ import os, glob
 import subprocess
 import sys
 
-def main():
-    # Create a neat directory structure to store all of the image that our
-    # image identification system will generate.
-    root = ""
-    if len(sys.argv) > 1:
-        root = sys.argv[1]
+class Photographer:
+    def take_pictures(self):
+        # Take pictures forever.
+        camera = SonyAPI()
+        camera.QX_ADDR = "http://192.168.122.1:8080"
 
-    parent_directory = root + "captures"
-    if os.path.isdir(parent_directory) is False:
-        os.makedirs(parent_directory)
+        # TODO(comran): Try/catch the below command to detect if we are actually
+        #               connected to the camera.
+        camera.actTakePicture()
 
-    raw_directory = parent_directory + "/raw"
-    if os.path.isdir(raw_directory) is False:
-        os.makedirs(raw_directory)
+        print "Starting to take pictures..."
+        i = 0
+        while 1:
+            url = camera.actTakePicture()['result'][0][0]
+            url = url.replace("\/", "/")
+            url = url.replace("Scn", "Origin")
 
-    segments_directory = parent_directory + "/segments"
-    if os.path.isdir(segments_directory) is False:
-        os.makedirs(segments_directory)
+            captured_image_path = directory_string + "/" + str(i) + ".jpg"
+            urllib.urlretrieve(url, captured_image_path)
 
-    directory = 0
-    while os.path.isdir(raw_directory + "/" + str(directory).zfill(5)):
-        directory = directory + 1;
-
-    directory_string = raw_directory + "/" + str(directory).zfill(5)
-    os.makedirs(directory_string)
-
-    # Take pictures forever.
-    camera = SonyAPI()
-    camera.QX_ADDR = "http://192.168.122.1:8080"
-
-#   print "Starting to take pictures..."
-#   i = 0
-
-#   while 1:
-#       url = camera.actTakePicture()['result'][0][0]
-#       url = url.replace("\/", "/")
-#       print url
-#       urllib.urlretrieve(url, "/home/pi/vision/captures/" + str(directory) \
-#               + "/" + str(i) + ".jpg")
-#       i = i + 1;
-
-if __name__ == "__main__":
-    main()
+            i = i + 1;
+            print "Picture #" + str(i) + " stored at " + captured_image_path
