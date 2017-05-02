@@ -1,7 +1,11 @@
 import photographer
+import segmenter
 
-import sys
+from collections import deque
 import os
+import sys
+import thread
+import time
 
 def form_directory_structure():
     # Create a neat directory structure to store all of the image that our
@@ -28,16 +32,39 @@ def form_directory_structure():
     directory = 0
     while os.path.isdir(raw_directory + "/" + str(directory).zfill(5)):
         directory = directory + 1;
-    directory_string = raw_directory + "/" + str(directory).zfill(5)
-    print "Will store raw captured images in " + directory_string
-    os.makedirs(directory_string)
-    return directory_string
+
+    full_directory_paths = list()
+
+    full_directory_paths.append(raw_directory + "/" + str(directory).zfill(5))
+    full_directory_paths.append(segments_directory + "/" + str(directory).zfill(5))
+
+    if os.path.isdir(full_directory_paths[0]) is True \
+        or os.path.isdir(full_directory_paths[1]) is True:
+        print "Raw and segment directories are out of sync."
+        sys.exit(1)
+
+    os.makedirs(full_directory_paths[0])
+    os.makedirs(full_directory_paths[1])
+    print "Will store raw captured images in " + full_directory_paths[0]
+    print "Will store segmented images in " + full_directory_paths[1]
+
+    return full_directory_paths
 
 def main():
-    camera = photographer.Photographer()
+    photos = deque()
 
-    form_directory_structure()
-    camera.take_pictures()
+    camera = photographer.Photographer()
+    segment_generator = segmenter.Segmenter()
+
+    full_directory_paths = form_directory_structure()
+
+    thread.start_new_thread(camera.take_pictures, (full_directory_paths[0], \
+        photos, ))
+    thread.start_new_thread(segment_generator.use_deque_stream, ( \
+            full_directory_paths[1], photos, ))
+
+    while True:
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
