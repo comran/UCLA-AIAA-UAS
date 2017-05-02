@@ -76,7 +76,6 @@ class Segmenter:
         if frame is None:
             print "Image given has no data to analyze."
             sys.exit(1)
-
         grey_scale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         process_frame(frame);
         cv2.waitKey(0)
@@ -93,6 +92,7 @@ class Segmenter:
             grey_scale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             possible_shapes = self.process_frame(frame);
 
+            # Output the images.
             i = 0
             for shape in possible_shapes:
                 image_path = save_directory + "/" + str(i) + ".jpg"

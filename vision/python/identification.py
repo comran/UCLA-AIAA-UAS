@@ -33,10 +33,12 @@ def form_directory_structure():
     while os.path.isdir(raw_directory + "/" + str(directory).zfill(5)):
         directory = directory + 1;
 
+    # Package the directories where we are going to store our raw/segmented
+    # images into a structure.
     full_directory_paths = list()
-
     full_directory_paths.append(raw_directory + "/" + str(directory).zfill(5))
-    full_directory_paths.append(segments_directory + "/" + str(directory).zfill(5))
+    full_directory_paths.append(segments_directory + "/" + str(directory) \
+            .zfill(5))
 
     if os.path.isdir(full_directory_paths[0]) is True \
         or os.path.isdir(full_directory_paths[1]) is True:
