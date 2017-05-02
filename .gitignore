@@ -2,4 +2,4 @@
 /bazel-*
 /compile_commands.json
 .*.swp
-/vision/identification/captures
+captures
