@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import sys
 import time
+import os
 
 class Segmenter:
     def cut_from_image(self, frame, padding, x, y, w, h):
@@ -51,8 +52,10 @@ class Segmenter:
                     (x + w, y + h), (255, 0, 0), 1)
             cv2.imshow("Contour Locations", bounding_box_highlight_frame)
 
-        print str(len(possible_shapes)) + " good contours were found! (" \
-                + str(len(contours)) + " were filtered out)"
+        print str(len(possible_shapes)) \
+                + " good contours were found! (" \
+                + str(len(contours)) \
+                + " were filtered out)"
 
         return possible_shapes
 
@@ -88,13 +91,24 @@ class Segmenter:
                 time.sleep(1)
                 continue
 
-            frame = cv2.imread(photos.pop(), cv2.CV_LOAD_IMAGE_COLOR)
+            raw_image_path = photos.pop()
+            frame = cv2.imread(raw_image_path, cv2.CV_LOAD_IMAGE_COLOR)
             grey_scale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             possible_shapes = self.process_frame(frame);
+
+            # Make a new folder just for this image's segments.
+            image_folder_name = os.path.basename(raw_image_path)
+            image_folder_name = image_folder_name.replace(".jpg", "")
+            image_folder_name = save_directory + "/" + image_folder_name
+            print image_folder_name
+            if os.path.isdir(image_folder_name) is True:
+                print "Segments directory out of sync."
+                sys.exit(1)
+            os.makedirs(image_folder_name)
 
             # Output the images.
             i = 0
             for shape in possible_shapes:
-                image_path = save_directory + "/" + str(i) + ".jpg"
+                image_path = image_folder_name + "/" + str(i).zfill(5) + ".jpg"
                 cv2.imwrite(image_path, shape)
                 i = i + 1

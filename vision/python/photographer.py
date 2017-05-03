@@ -22,9 +22,9 @@ class Photographer:
             url = url.replace("\/", "/")
             url = url.replace("Scn", "Origin")
 
-            image_path = save_directory + "/" + str(i) + ".jpg"
+            image_path = save_directory + "/" + str(i).zfill(5) + ".jpg"
             urllib.urlretrieve(url, image_path)
             photos.append(image_path)
 
             i = i + 1;
-            print "Picture #" + str(i) + " stored at " + captured_image_path
+            print "Picture #" + str(i) + " stored at " + image_path
