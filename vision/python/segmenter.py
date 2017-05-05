@@ -1,4 +1,6 @@
 import numpy as np
+from matplotlib import pyplot as plt
+import cv
 import cv2
 import sys
 import time
@@ -30,6 +32,7 @@ class Segmenter:
             cv2.CHAIN_APPROX_SIMPLE)
 
         possible_shapes = list()
+        i = 0
         for cnt in contours:
             if len(cnt) < 5:
                 continue
@@ -44,13 +47,45 @@ class Segmenter:
             if abs(aspect_ratio - 1) > aspect_ratio_tolerance:
                 continue
 
+            print "Image " + str(i)
+
             extracted_contour = self.cut_from_image(original_frame, 10, x, y, \
                     w, h)
             possible_shapes.append(extracted_contour)
 
             cv2.rectangle(bounding_box_highlight_frame, (x, y), \
                     (x + w, y + h), (255, 0, 0), 1)
+
             cv2.imshow("Contour Locations", bounding_box_highlight_frame)
+            cv2.moveWindow("Contour Locations", 300, 0)
+            cv2.imshow("contour", extracted_contour)
+
+            img = extracted_contour
+            h = np.zeros((300,256,3))
+            bins = np.arange(256).reshape(256,1)
+            color = [ (255,0,0),(0,255,0),(0,0,255) ]
+
+            histogram_reject = True
+            for ch, col in enumerate(color):
+                hist_item = cv2.calcHist([img],[ch],None,[256],[0,255])
+#               cv2.normalize(hist_item,hist_item,0,255,cv2.NORM_MINMAX)
+                hist=np.int32(np.around(hist_item))
+                print hist_item.max()
+                if hist_item.max() > 100:
+                    histogram_reject = False
+
+                pts = np.column_stack((bins,hist))
+                cv2.polylines(h,[pts],False,col)
+
+            if histogram_reject is False:
+                print "Good contour!"
+                i = i + 1
+
+            h = np.flipud(h)
+
+            cv2.imshow('colorhist',h)
+            cv2.moveWindow("colorhist", 80, 0)
+            cv2.waitKey(0)
 
         print str(len(possible_shapes)) \
                 + " good contours were found! (" \
@@ -80,7 +115,7 @@ class Segmenter:
             print "Image given has no data to analyze."
             sys.exit(1)
         grey_scale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        process_frame(frame);
+        self.process_frame(frame);
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -112,3 +147,11 @@ class Segmenter:
                 image_path = image_folder_name + "/" + str(i).zfill(5) + ".jpg"
                 cv2.imwrite(image_path, shape)
                 i = i + 1
+
+def main():
+    if len(sys.argv) > 1:
+        segmenter = Segmenter()
+        segmenter.use_given_image()
+
+if __name__ == "__main__":
+    main()
