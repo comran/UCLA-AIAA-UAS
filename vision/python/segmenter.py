@@ -51,40 +51,54 @@ class Segmenter:
 
             extracted_contour = self.cut_from_image(original_frame, 10, x, y, \
                     w, h)
+
             possible_shapes.append(extracted_contour)
 
-            cv2.rectangle(bounding_box_highlight_frame, (x, y), \
-                    (x + w, y + h), (255, 0, 0), 1)
-
-            cv2.imshow("Contour Locations", bounding_box_highlight_frame)
-            cv2.moveWindow("Contour Locations", 300, 0)
-            cv2.imshow("contour", extracted_contour)
-
-            img = extracted_contour
-            h = np.zeros((300,256,3))
-            bins = np.arange(256).reshape(256,1)
-            color = [ (255,0,0),(0,255,0),(0,0,255) ]
+            hist_image = np.zeros((300, 256, 3))
+            bins = np.arange(256).reshape(256, 1)
+            color = [(255,0,0), (0,255,0), (0,0,255)]
 
             histogram_reject = True
             for ch, col in enumerate(color):
-                hist_item = cv2.calcHist([img],[ch],None,[256],[0,255])
-#               cv2.normalize(hist_item,hist_item,0,255,cv2.NORM_MINMAX)
-                hist=np.int32(np.around(hist_item))
+                hist_item = cv2.calcHist([extracted_contour], [ch], None, \
+                        [256], [0,255])
+                hist = np.int32(np.around(hist_item))
                 print hist_item.max()
                 if hist_item.max() > 100:
                     histogram_reject = False
 
-                pts = np.column_stack((bins,hist))
-                cv2.polylines(h,[pts],False,col)
+                pts = np.column_stack((bins, hist))
+                cv2.polylines(hist_image, [pts], False, col)
 
+            r = 0
+            g = 0
             if histogram_reject is False:
                 print "Good contour!"
                 i = i + 1
+                g = 255
+            else:
+                r = 255
 
-            h = np.flipud(h)
+            cv2.rectangle(bounding_box_highlight_frame, (x, y), \
+                    (x + w, y + h), (0, g, r), 1)
 
-            cv2.imshow('colorhist',h)
-            cv2.moveWindow("colorhist", 80, 0)
+            hist_image = np.flipud(hist_image)
+
+            cv2.imshow('colorhist', hist_image)
+            cv2.moveWindow("colorhist", 80, 20)
+
+#           r = 0
+#           g = 0
+#           if histogram_reject:
+#               r = 255
+#           else:
+#               g = 255
+
+            cv2.imshow("Contour Locations", bounding_box_highlight_frame)
+            cv2.moveWindow("Contour Locations", 400, 20)
+            cv2.imshow("contour", extracted_contour)
+            cv2.moveWindow("contour", 0, 20)
+
             cv2.waitKey(0)
 
         print str(len(possible_shapes)) \
