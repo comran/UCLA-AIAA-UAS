@@ -6,12 +6,17 @@ import sys
 import time
 import os
 
+TESTING = False
+
 class Segmenter:
     def cut_from_image(self, frame, padding, x, y, w, h):
         x_min = max(0, x - padding)
         x_max = min(np.size(frame, 1), x + w + padding * 2)
         y_min = max(0, y - padding)
         y_max = min(np.size(frame, 1), y + h + padding * 2)
+        if TESTING:
+            print "WIDTH: " + str(w)
+            print "HEIGHT: " + str(h)
 
         return frame[y_min:y_max, x_min:x_max]
 
@@ -47,7 +52,8 @@ class Segmenter:
             if abs(aspect_ratio - 1) > aspect_ratio_tolerance:
                 continue
 
-            print "Image " + str(i)
+            if TESTING:
+                print "Image " + str(i)
 
             extracted_contour = self.cut_from_image(original_frame, 10, x, y, \
                     w, h)
@@ -84,8 +90,9 @@ class Segmenter:
 
             hist_image = np.flipud(hist_image)
 
-            cv2.imshow('colorhist', hist_image)
-            cv2.moveWindow("colorhist", 80, 20)
+            if TESTING:
+                cv2.imshow('colorhist', hist_image)
+                cv2.moveWindow("colorhist", 80, 20)
 
 #           r = 0
 #           g = 0
@@ -94,12 +101,11 @@ class Segmenter:
 #           else:
 #               g = 255
 
-            cv2.imshow("Contour Locations", bounding_box_highlight_frame)
-            cv2.moveWindow("Contour Locations", 400, 20)
-            cv2.imshow("contour", extracted_contour)
-            cv2.moveWindow("contour", 0, 20)
-
-            cv2.waitKey(0)
+            if TESTING:
+                cv2.imshow("Contour Locations", bounding_box_highlight_frame)
+                cv2.moveWindow("Contour Locations", 400, 20)
+                cv2.imshow("contour", extracted_contour)
+                cv2.moveWindow("contour", 0, 20)
 
         print str(len(possible_shapes)) \
                 + " good contours were found! (" \
@@ -117,11 +123,13 @@ class Segmenter:
             ret, frame = cap.read()
             process_frame(frame)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            if TESTING:
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
 
         cap.release()
-        cv2.destroyAllWindows()
+        if TESTING:
+            cv2.destroyAllWindows()
 
     def use_given_image(self):
         frame = cv2.imread(sys.argv[1], cv2.CV_LOAD_IMAGE_COLOR)
@@ -130,8 +138,9 @@ class Segmenter:
             sys.exit(1)
         grey_scale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         self.process_frame(frame);
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        if TESTING:
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
     def use_deque_stream(self, save_directory, photos):
         while True:
