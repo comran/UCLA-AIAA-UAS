@@ -6,3 +6,5 @@ vision/shape_classifier/tf_files
 vision/images/training_images
 vision/images/bottlenecks
 captures
+retrained_graph.pb
+retrained_labels.txt
