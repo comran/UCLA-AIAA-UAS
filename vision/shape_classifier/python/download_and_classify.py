@@ -33,7 +33,7 @@ def main():
     remote = "pi@192.168.1.2"
     remote_captures_directory = '/home/pi/vision/captures/segments/'
 
-    os.system("ssh-add ../../python/ucla-aiaa-uas-raspi")
+    os.system("ssh-add ../../ssh_keys/ucla-aiaa-uas-raspi")
     segments = deque()
     captures_path = form_directory_structure()
 

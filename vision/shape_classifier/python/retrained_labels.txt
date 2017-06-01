@@ -4,6 +4,7 @@ triangle
 half circle
 cross
 octagon
+empty
 square
 quarter circle
 trapezoid
