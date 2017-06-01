@@ -2,5 +2,7 @@
 /bazel-*
 /compile_commands.json
 .*.swp
+vision/shape_classifier/tf_files
+vision/images/training_images
+vision/images/bottlenecks
 captures
-tf_files

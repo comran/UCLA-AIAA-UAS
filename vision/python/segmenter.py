@@ -1,5 +1,5 @@
 import numpy as np
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import cv
 import cv2
 import sys
@@ -145,11 +145,11 @@ class Segmenter:
     def use_deque_stream(self, save_directory, photos):
         while True:
             if len(photos) == 0:
-                print "No photos available to segment."
-                time.sleep(1)
+                time.sleep(1 / 100.0)
                 continue
 
-            raw_image_path = photos.pop()
+            raw_image_path = photos.pop() + ".jpg"
+            print "Segmenting " + raw_image_path
             frame = cv2.imread(raw_image_path, cv2.CV_LOAD_IMAGE_COLOR)
             grey_scale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             possible_shapes = self.process_frame(frame);

@@ -1,0 +1,13 @@
+heptagon
+diamond
+triangle
+half circle
+cross
+octagon
+square
+quarter circle
+trapezoid
+circle
+hexagon
+pentagon
+rectangle
