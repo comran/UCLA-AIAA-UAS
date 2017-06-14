@@ -4,7 +4,7 @@ import time
 from collections import deque
 
 class Classifier:
-    def __init__(self):
+    def use_deque_stream(self, segments, one_shot):
         # Loads label file, strips off carriage return
         self.label_lines = [line.rstrip() for line
                            in tf.gfile.GFile("./retrained_labels.txt")]
@@ -15,7 +15,6 @@ class Classifier:
             graph_def.ParseFromString(f.read())
             _ = tf.import_graph_def(graph_def, name='')
 
-    def use_deque_stream(self, segments, one_shot):
         with tf.Session() as sess:
             while True:
                 if len(segments) == 0:

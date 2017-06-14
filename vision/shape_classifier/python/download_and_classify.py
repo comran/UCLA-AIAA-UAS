@@ -26,7 +26,6 @@ def add_raw_output_to_deque(raw, segment_deque):
     for new_file in new_files:
         if new_file.find("captures") != -1 and new_file.find(".jpg") != -1:
             segment_deque.append(new_file)
-            print new_file
 
 
 def main():
@@ -41,20 +40,11 @@ def main():
     thread.start_new_thread(segment_classifier.use_deque_stream, ( \
             segments, False, ))
 
-    proc = subprocess.Popen("ssh " + remote + " find " + \
-            remote_captures_directory, \
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    new_files_raw = proc.stdout.read()
-    new_files_raw = new_files_raw.replace( \
-            "/home/pi/vision/captures/segments/", "captures/")
-    print new_files_raw
-    add_raw_output_to_deque(new_files_raw, segments)
-
     while True:
         time.sleep(1)
         print str(datetime.now()) + " Attempting sync..."
 
-        proc = subprocess.Popen("rsync -avz --partial " \
+        proc = subprocess.Popen("rsync -avz --partial  --timeout=1 " \
                 + "--out-format='captures/%n' " + remote + ":" + \
                 remote_captures_directory + " ./captures", \
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
