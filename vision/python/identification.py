@@ -10,7 +10,7 @@ import time
 def form_directory_structure():
     # Create a neat directory structure to store all of the image that our
     # image identification system will generate.
-    root = "./"
+    root = "/home/pi/vision/"
     if len(sys.argv) > 1:
         root = sys.argv[1]
 
